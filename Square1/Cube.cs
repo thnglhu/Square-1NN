@@ -10,6 +10,10 @@ namespace Square_1NN.Square1
 {
     public class Cube
     {
+        private enum Highlight
+        {
+            TOP, BOT, MIDDLE, NONE
+        }
         static ColoredRearLayer TOP = new ColoredRearLayer("yrYrgygYgo yoYobybYbr");
         static ColoredMiddleLayer MIDDLE = new ColoredMiddleLayer("Rgo Obr");
         static ColoredRearLayer BOTTOM = new ColoredRearLayer("wrWrgwgWgo woWobwbWbr");
@@ -24,10 +28,13 @@ namespace Square_1NN.Square1
         static Texture2D[] middle_side;
         static Texture2D[] middle_top;
         static bool init = false;
+        Vector2 center = new Vector2(100, 100);
+        Vector2 center2 = new Vector2(100, 300);
+        Highlight current = Highlight.NONE;
         readonly LayerBase[] layers;
-        List<(Texture2D, Color, Vector2)> prepare = null;
+        List<(Texture2D, Color, Vector2)> top = null, middle = null, bot = null;
         Controller controller;
-        Dictionary<char, Color> keys = new Dictionary<char, Color>()
+        Dictionary<char, Color> normal_map = new Dictionary<char, Color>()
         {
             ['w'] = Color.White,
             ['y'] = Color.Yellow,
@@ -36,6 +43,16 @@ namespace Square_1NN.Square1
             ['b'] = Color.DeepSkyBlue,
             ['o'] = Color.Orange,
         };
+        Dictionary<char, Color> highlight_map = new Dictionary<char, Color>()
+        {
+            ['w'] = Color.LightGray,
+            ['y'] = Color.GreenYellow,
+            ['r'] = Color.DarkRed,
+            ['g'] = Color.DarkGreen,
+            ['b'] = Color.Blue,
+            ['o'] = Color.OrangeRed,
+        };
+
         public Cube(Controller controller)
         {
             Init(this.controller = controller);            
@@ -53,10 +70,23 @@ namespace Square_1NN.Square1
         }
         public void Display()
         {
-            if (prepare == null) Prepare();
-            prepare.ForEach(packed => controller.DrawTexture(packed.Item1, packed.Item2, packed.Item3));
+            if (top == null || bot == null || middle == null) Prepare();
+            bot.ForEach(packed => controller.DrawTexture(packed.Item1, packed.Item2, packed.Item3));
+            middle.ForEach(packed => controller.DrawTexture(packed.Item1, packed.Item2, packed.Item3));
+            top.ForEach(packed => controller.DrawTexture(packed.Item1, packed.Item2, packed.Item3));
         }
-        private void DisplayLower(Vector2 vector2, string extract, string side_color)
+        public static bool InsideTriangle(int pos_x, int pos_y, int x, int y, int width, int height)
+        {
+            if (pos_x < x || pos_x > x + width || pos_y < y || pos_y > y + height) return false;
+            if (pos_x < x + width / 2) pos_x = 2 * x + width - pos_x;
+            double desire = (double)(x + width - pos_x) / (width / 2) * height;
+            return pos_y - y <= desire;
+        }
+        public static bool InsideRectangle(int pos_x, int pos_y, int x, int y, int width, int height)
+        {
+            return !(pos_x < x || pos_x > x + width || pos_y < y || pos_y > y + height);
+        }
+        private void DisplayLower(Vector2 vector2, string extract, string side_color, Dictionary<char, Color> color)
         {
             extract = extract.Substring(6) + extract.Substring(0, 6);
             side_color = side_color.Substring(6) + side_color.Substring(0, 6);
@@ -66,29 +96,29 @@ namespace Square_1NN.Square1
                 int pos = (6 + subindex) % 12;
                 if (code == 2)
                 {
-                    prepare.Add((small_bottom_side[pos], keys[side_color[subindex % side_color.Length]], vector2));
+                    bot.Add((small_bottom_side[pos], color[side_color[subindex % side_color.Length]], vector2));
                 }
                 else if (code == 1)
                 {
-                    prepare.Add((large_bottom_side[2 * pos], keys[side_color[subindex % side_color.Length]], vector2));
+                    bot.Add((large_bottom_side[2 * pos], color[side_color[subindex % side_color.Length]], vector2));
                 }
                 else
                 {
-                    prepare.Add((large_bottom_side[(2 * pos + 23) % 24], keys[side_color[subindex % side_color.Length]], vector2));
+                    bot.Add((large_bottom_side[(2 * pos + 23) % 24], color[side_color[subindex % side_color.Length]], vector2));
                 }
                 code = extract[9 - subindex] - '0';
                 pos = (15 - subindex) % 12;
                 if (code == 2)
                 {
-                    prepare.Add((small_bottom_side[pos], keys[side_color[(9 + side_color.Length - subindex) % side_color.Length]], vector2));
+                    bot.Add((small_bottom_side[pos], color[side_color[(9 + side_color.Length - subindex) % side_color.Length]], vector2));
                 }
                 else if (code == 1)
                 {
-                    prepare.Add((large_bottom_side[2 * pos], keys[side_color[(9 + side_color.Length - subindex) % side_color.Length]], vector2));
+                    bot.Add((large_bottom_side[2 * pos], color[side_color[(9 + side_color.Length - subindex) % side_color.Length]], vector2));
                 }
                 else
                 {
-                    prepare.Add((large_bottom_side[(2 * pos + 23) % 24], keys[side_color[(9 + side_color.Length - subindex) % side_color.Length]], vector2));
+                    bot.Add((large_bottom_side[(2 * pos + 23) % 24], color[side_color[(9 + side_color.Length - subindex) % side_color.Length]], vector2));
                 }
             }
             int index = 6;
@@ -97,71 +127,71 @@ namespace Square_1NN.Square1
                 int code = chr - '0';
                 if (code == 2)
                 {
-                    prepare.Add((small_bottom[index], Color.White, vector2));
+                    bot.Add((small_bottom[index], Color.White, vector2));
                 }
                 else if (code == 1)
                 {
-                    prepare.Add((large_bottom[index], Color.White, vector2));
+                    bot.Add((large_bottom[index], Color.White, vector2));
                 }
                 index = (index + 1) % 12;
             }
         }
         
 
-        private void DisplayMiddle(Vector2 vector2, string extract, string side_color)
+        private void DisplayMiddle(Vector2 vector2, string extract, string side_color, Dictionary<char, Color> color)
         {
             if (extract[0] == '4')
             {
-                prepare.Add((middle_side[0], keys[side_color[0]], vector2));
-                prepare.Add((middle_top[0], Color.White, vector2));
+                middle.Add((middle_side[0], color[side_color[0]], vector2));
+                middle.Add((middle_top[0], Color.White, vector2));
             }
             else
             {
-                prepare.Add((middle_side[1], keys[side_color[0]], vector2));
-                prepare.Add((middle_top[1], Color.White, vector2));
+                middle.Add((middle_side[1], color[side_color[0]], vector2));
+                middle.Add((middle_top[1], Color.White, vector2));
             }
             if (extract[6] == '2')
             {
-                prepare.Add((middle_side[2], keys[side_color[9]], vector2));
-                prepare.Add((middle_side[3], keys[side_color[11]], vector2));
-                prepare.Add((middle_top[2], Color.White, vector2));
+                middle.Add((middle_side[2], color[side_color[9]], vector2));
+                middle.Add((middle_side[3], color[side_color[11]], vector2));
+                middle.Add((middle_top[2], Color.White, vector2));
             }
             else
             {
-                prepare.Add((middle_side[4], keys[side_color[9]], vector2));
-                prepare.Add((middle_side[5], keys[side_color[11]], vector2));
-                prepare.Add((middle_top[3], Color.White, vector2));
+                middle.Add((middle_side[4], color[side_color[9]], vector2));
+                middle.Add((middle_side[5], color[side_color[11]], vector2));
+                middle.Add((middle_top[3], Color.White, vector2));
             }
         }
 
-        private void DisplayAlternativeMiddle(Vector2 vector2, string extract, string side_color)
+        private void DisplayAlternativeMiddle(Vector2 vector2, string extract, string side_color, Dictionary<char, Color> color)
         {
             if (extract[0] == '4')
             {
-                prepare.Add((middle_side[8], keys[side_color[0]], vector2));
-                prepare.Add((middle_side[9], keys[side_color[1]], vector2));
-                prepare.Add((middle_top[6], Color.White, vector2));
+                middle.Add((middle_side[8], color[side_color[0]], vector2));
+                middle.Add((middle_side[9], color[side_color[1]], vector2));
+                middle.Add((middle_top[6], Color.White, vector2));
             }
             else
             {
-                prepare.Add((middle_side[10], keys[side_color[0]], vector2));
-                prepare.Add((middle_side[11], keys[side_color[2]], vector2));
-                prepare.Add((middle_top[7], Color.White, vector2));
+                middle.Add((middle_side[10], color[side_color[0]], vector2));
+                middle.Add((middle_side[11], color[side_color[2]], vector2));
+                middle.Add((middle_top[7], Color.White, vector2));
             }
             if (extract[6] == '2')
             {
-                prepare.Add((middle_side[6], keys[side_color[11]], vector2));
-                prepare.Add((middle_top[4], Color.White, vector2));
+                middle.Add((middle_side[6], color[side_color[11]], vector2));
+                middle.Add((middle_top[4], Color.White, vector2));
             }
             else
             {
-                prepare.Add((middle_side[7], keys[side_color[11]], vector2));
-                prepare.Add((middle_top[5], Color.White, vector2));
+                middle.Add((middle_side[7], color[side_color[11]], vector2));
+                middle.Add((middle_top[5], Color.White, vector2));
             }
         }
 
 
-        private void DisplayUpper(Vector2 vector2, string extract, string side_color, string top_color)
+        private void DisplayUpper(Vector2 vector2, string extract, string side_color, string top_color, Dictionary<char, Color> color)
         {
             string backup = extract;
             extract = extract.Substring(6) + extract.Substring(0, 6);
@@ -171,28 +201,28 @@ namespace Square_1NN.Square1
                 int code = extract[subindex] - '0';
                 int pos = (6 + subindex) % 12;
                 if (code == 2)
-                    prepare.Add((small_top_side[pos], keys[side_color[subindex % side_color.Length]], vector2));
+                    top.Add((small_top_side[pos], color[side_color[subindex % side_color.Length]], vector2));
                 else if (code == 1)
-                    prepare.Add((large_top_side[2 * pos], keys[side_color[subindex % side_color.Length]], vector2));
+                    top.Add((large_top_side[2 * pos], color[side_color[subindex % side_color.Length]], vector2));
                 else
-                    prepare.Add((large_top_side[(2 * pos + 23) % 24], keys[side_color[subindex % side_color.Length]], vector2));
+                    top.Add((large_top_side[(2 * pos + 23) % 24], color[side_color[subindex % side_color.Length]], vector2));
                 code = extract[9 - subindex] - '0';
                 pos = (15 - subindex) % 12;
                 if (code == 2)
-                    prepare.Add((small_top_side[pos], keys[side_color[(9 + side_color.Length - subindex) % side_color.Length]], vector2));
+                    top.Add((small_top_side[pos], color[side_color[(9 + side_color.Length - subindex) % side_color.Length]], vector2));
                 else if (code == 1)
-                    prepare.Add((large_top_side[2 * pos], keys[side_color[(9 + side_color.Length - subindex) % side_color.Length]], vector2));
+                    top.Add((large_top_side[2 * pos], color[side_color[(9 + side_color.Length - subindex) % side_color.Length]], vector2));
                 else
-                    prepare.Add((large_top_side[(2 * pos + 23) % 24], keys[side_color[(9 + side_color.Length - subindex) % side_color.Length]], vector2));
+                    top.Add((large_top_side[(2 * pos + 23) % 24], color[side_color[(9 + side_color.Length - subindex) % side_color.Length]], vector2));
             }
             int index = 0;
             foreach (char chr in backup)
             {
                 int code = chr - '0';
                 if (code == 2)
-                    prepare.Add((small_top[index], keys[top_color[index]], vector2));
+                    top.Add((small_top[index], color[top_color[index]], vector2));
                 else if (code == 1)
-                    prepare.Add((large_top[index], keys[top_color[index]], vector2));
+                    top.Add((large_top[index], color[top_color[index]], vector2));
                 index = (index + 1) % 12;
             }
         }
@@ -248,7 +278,7 @@ namespace Square_1NN.Square1
                 }
                 select.Shift(value);
             }
-            prepare = null;
+            bot = middle = top = null;
             PrintHash();
             return true;
         }
@@ -323,29 +353,32 @@ namespace Square_1NN.Square1
         }
         private void Prepare()
         {
-            prepare = new List<(Texture2D, Color, Vector2)>();
-            Vector2 center = new Vector2(100, 100);
-            Vector2 center2 = new Vector2(100, 300);
+            bot = new List<(Texture2D, Color, Vector2)>();
+            middle = new List<(Texture2D, Color, Vector2)>();
+            top = new List<(Texture2D, Color, Vector2)>();
             string extract, side_color, top_color;
             extract = layers[2].Major + layers[2].Minor;
             side_color = (layers[2] as ColoredRearLayer).MajorSideColor + (layers[2] as ColoredRearLayer).MinorSideColor;
-            DisplayLower(center, extract, side_color);
+            Dictionary<char, Color> top_map = current == Highlight.TOP ? highlight_map : normal_map;
+            Dictionary<char, Color> bot_map = current == Highlight.BOT ? highlight_map : normal_map;
+            Dictionary<char, Color> middle_map = current == Highlight.MIDDLE ? highlight_map : normal_map;
+            DisplayLower(center, extract, side_color, bot_map);
 
             extract = layers[1].Major + layers[1].Minor;
             side_color = (layers[1] as ColoredMiddleLayer).MajorSideColor + (layers[1] as ColoredMiddleLayer).MinorSideColor;
-            DisplayMiddle(center, extract, side_color);
+            DisplayMiddle(center, extract, side_color, middle_map);
 
             extract = layers[0].Major + layers[0].Minor;
             side_color = (layers[0] as ColoredRearLayer).MajorSideColor + (layers[0] as ColoredRearLayer).MinorSideColor;
             top_color = (layers[0] as ColoredRearLayer).MajorColor + (layers[0] as ColoredRearLayer).MinorColor;
-            DisplayUpper(center, extract, side_color, top_color);
+            DisplayUpper(center, extract, side_color, top_color, top_map);
 
             layers[0].Shift(4);
             layers[0].Reverse(true);
             layers[0].Reverse(false);
             extract = layers[0].Minor + layers[0].Major;
             side_color = (layers[0] as ColoredRearLayer).MinorSideColor + (layers[0] as ColoredRearLayer).MajorSideColor;
-            DisplayLower(center2, extract, side_color);
+            DisplayLower(center2, extract, side_color, top_map);
             layers[0].Reverse(false);
             layers[0].Reverse(true);
             layers[0].Shift(-4);
@@ -354,7 +387,7 @@ namespace Square_1NN.Square1
             side_color = (layers[1] as ColoredMiddleLayer).MinorSideColor + (layers[1] as ColoredMiddleLayer).MajorSideColor;
             LayerBase.Reverse(ref extract);
             LayerBase.Reverse(ref side_color);
-            DisplayAlternativeMiddle(center2, extract, side_color);
+            DisplayAlternativeMiddle(center2, extract, side_color, middle_map);
 
             layers[2].Shift(4);
             layers[2].Reverse(true);
@@ -362,7 +395,7 @@ namespace Square_1NN.Square1
             extract = layers[2].Minor + layers[2].Major;
             side_color = (layers[2] as ColoredRearLayer).MinorSideColor + (layers[2] as ColoredRearLayer).MajorSideColor;
             top_color = (layers[2] as ColoredRearLayer).MinorColor + (layers[2] as ColoredRearLayer).MajorColor;
-            DisplayUpper(center2, extract, side_color, top_color);
+            DisplayUpper(center2, extract, side_color, top_color, bot_map);
             layers[2].Reverse(false);
             layers[2].Reverse(true);
             layers[2].Shift(-4);
@@ -390,6 +423,100 @@ namespace Square_1NN.Square1
                 result.Append(b[index]);
             }
             return result.ToString();
+        }
+        public void MouseMove(int x, int y)
+        {
+            if (!is_lock)
+            {
+                Highlight previous = current;
+                Vector2 clone = new Vector2(center.X, center.Y);
+                clone.X -= 70;
+                clone.Y += 40;
+                current = Highlight.NONE;
+                if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                {
+                    current = Highlight.BOT;
+                }
+                clone.Y -= 26;
+                if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                {
+                    current = Highlight.MIDDLE;
+                }
+                clone.Y -= 26;
+                if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                {
+                    current = Highlight.TOP;
+                }
+                if (previous != current) Prepare();
+            }
+            else if (current != Highlight.NONE)
+            {
+                dx += x - px;
+                dy += y - py;
+                if (dy < -20 || dy > 20)
+                {
+                    dx = 0;
+                }
+                if (dy < -40 || dy > 40)
+                {
+                    if (x > center.X - 70 + 95) Act("/");
+                    else Act("\\");
+                    dx = 0;
+                    if (dy < -40) dy += 40;
+                    if (dy > 40) dy -= 40;
+                }
+                if (dx > 20)
+                {
+                    dy = 0;
+                    dx -= 20;
+                    switch (current)
+                    {
+                        case Highlight.TOP:
+                            Act("-1");
+                            break;
+                        case Highlight.BOT:
+                            Act("1'");
+                            break;
+                        default: break;
+                    }
+                }
+                else if (dx < -20)
+                {
+                    dy = 0;
+                    dx += 20;
+                    switch (current)
+                    {
+                        case Highlight.TOP:
+                            Act("1");
+                            break;
+                        case Highlight.BOT:
+                            Act("-1'");
+                            break;
+                        default: break;
+                    }
+                }
+                px = x;
+                py = y;
+            }
+        }
+        int dx = 0, dy = 0, px = 0, py = 0;
+        bool is_lock = false;
+        public void Lock(int x, int y)
+        {
+            if (is_lock == false)
+            {
+                is_lock = true;
+                px = x;
+                py = y;
+            }
+        }
+        public void Unlock()
+        {
+            if (is_lock == true)
+            {
+                is_lock = false;
+                dx = dy = 0;
+            }
         }
     }
 }

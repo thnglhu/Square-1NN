@@ -33,6 +33,7 @@ namespace Square_1NN
             // TODO: Add your initialization logic here
 
             base.Initialize();
+            IsMouseVisible = true;
         }
 
         /// <summary>
@@ -172,6 +173,10 @@ namespace Square_1NN
             {
                 middle = false;
             }
+            MouseState mouse = Mouse.GetState();
+            cube.MouseMove(mouse.X, mouse.Y);
+            if (mouse.LeftButton == ButtonState.Pressed) cube.Lock(mouse.X, mouse.Y);
+            if (mouse.LeftButton == ButtonState.Released) cube.Unlock();
             base.Update(gameTime);
         }
 
