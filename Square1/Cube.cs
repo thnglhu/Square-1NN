@@ -36,7 +36,7 @@ namespace Square_1NN.Square1
         Controller controller;
         Dictionary<char, Color> normal_map = new Dictionary<char, Color>()
         {
-            ['w'] = Color.White,
+            ['w'] = Color.AntiqueWhite,
             ['y'] = Color.Yellow,
             ['r'] = Color.Red,
             ['g'] = Color.LawnGreen,
@@ -45,12 +45,12 @@ namespace Square_1NN.Square1
         };
         Dictionary<char, Color> highlight_map = new Dictionary<char, Color>()
         {
-            ['w'] = Color.LightGray,
-            ['y'] = Color.GreenYellow,
-            ['r'] = Color.DarkRed,
-            ['g'] = Color.DarkGreen,
-            ['b'] = Color.Blue,
-            ['o'] = Color.OrangeRed,
+            ['w'] = Color.White,
+            ['y'] = new Color(255, 250, 149),
+            ['r'] = new Color(255, 89, 89),
+            ['g'] = new Color(185, 255, 106),
+            ['b'] = new Color(98, 220, 255),
+            ['o'] = new Color(255, 196, 106),
         };
 
         public Cube(Controller controller)
@@ -424,6 +424,7 @@ namespace Square_1NN.Square1
             }
             return result.ToString();
         }
+        bool top_highlight = true;
         public void MouseMove(int x, int y)
         {
             if (!is_lock)
@@ -436,18 +437,42 @@ namespace Square_1NN.Square1
                 if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
                 {
                     current = Highlight.BOT;
+                    top_highlight = true;
                 }
                 clone.Y -= 26;
                 if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
                 {
                     current = Highlight.MIDDLE;
+                    top_highlight = true;
                 }
                 clone.Y -= 26;
                 if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
                 {
                     current = Highlight.TOP;
+                    top_highlight = true;
+                }
+                clone = new Vector2(center2.X, center2.Y);
+                clone.X -= 70;
+                clone.Y += 40;
+                if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                {
+                    current = Highlight.TOP;
+                    top_highlight = false;
+                }
+                clone.Y -= 26;
+                if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                {
+                    current = Highlight.MIDDLE;
+                    top_highlight = false;
+                }
+                clone.Y -= 26;
+                if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                {
+                    current = Highlight.BOT;
+                    top_highlight = false;
                 }
                 if (previous != current) Prepare();
+
             }
             else if (current != Highlight.NONE)
             {
@@ -457,13 +482,21 @@ namespace Square_1NN.Square1
                 {
                     dx = 0;
                 }
-                if (dy < -40 || dy > 40)
+                if (dy < -60 || dy > 60)
                 {
-                    if (x > center.X - 70 + 95) Act("/");
-                    else Act("\\");
+                    if (top_highlight)
+                    {
+                        if (lx > center.X - 70 + 95) Act("/");
+                        else Act("\\");
+                    }
+                    else
+                    {
+                        if (lx > center.X - 70 + 45) Act("/");
+                        else Act("\\");
+                    }
                     dx = 0;
-                    if (dy < -40) dy += 40;
-                    if (dy > 40) dy -= 40;
+                    if (dy < -60) dy += 60;
+                    if (dy > 60) dy -= 60;
                 }
                 if (dx > 20)
                 {
@@ -472,10 +505,10 @@ namespace Square_1NN.Square1
                     switch (current)
                     {
                         case Highlight.TOP:
-                            Act("-1");
+                            Act(top_highlight ? "-1" : "1");
                             break;
                         case Highlight.BOT:
-                            Act("1'");
+                            Act(top_highlight ? "1'" : "-1'");
                             break;
                         default: break;
                     }
@@ -487,10 +520,10 @@ namespace Square_1NN.Square1
                     switch (current)
                     {
                         case Highlight.TOP:
-                            Act("1");
+                            Act(top_highlight ? "1" : "-1");
                             break;
                         case Highlight.BOT:
-                            Act("-1'");
+                            Act(top_highlight ? "-1'" : "1'");
                             break;
                         default: break;
                     }
@@ -499,7 +532,7 @@ namespace Square_1NN.Square1
                 py = y;
             }
         }
-        int dx = 0, dy = 0, px = 0, py = 0;
+        int dx = 0, dy = 0, px = 0, py = 0, lx = 0, ly = 0;
         bool is_lock = false;
         public void Lock(int x, int y)
         {
@@ -508,6 +541,8 @@ namespace Square_1NN.Square1
                 is_lock = true;
                 px = x;
                 py = y;
+                lx = x;
+                ly = y;
             }
         }
         public void Unlock()
