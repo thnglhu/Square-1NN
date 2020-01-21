@@ -425,6 +425,10 @@ namespace Square_1NN.Square1
             return result.ToString();
         }
         bool top_highlight = true;
+        static double Delta(double from, double to)
+        {
+            return 0;
+        }
         public void MouseMove(int x, int y)
         {
             if (!is_lock)

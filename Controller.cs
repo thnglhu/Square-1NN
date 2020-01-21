@@ -19,6 +19,10 @@ namespace Square_1NN
         public Controller()
         {
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferWidth = 200;
+            graphics.PreferredBackBufferHeight = 500;
+            
+            graphics.ApplyChanges();
             Content.RootDirectory = "Content";
         }
 
