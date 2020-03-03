@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Square_1NN.Square1;
@@ -6,22 +7,28 @@ using System.Collections.Generic;
 
 namespace Square_1NN
 {
+    interface IDisplayer
+    {
+        void DrawTexture(Texture2D texture, Color tint, Vector2 position);
+    }
+
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
-    public class Controller : Game
+    public class Controller : Game, IDisplayer
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Cube cube;
         SpriteFont font;
+        static public ContentManager Manager;
 
         public Controller()
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = 200;
             graphics.PreferredBackBufferHeight = 500;
-            
+            Manager = Content;
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
         }
@@ -53,7 +60,7 @@ namespace Square_1NN
             // cube = new Cube(this, "wbWrbWgrYb ryryoybWbo Obr Rgo WgowgwowrYo gygYboYgr");
             // cube = new Cube(this, "WogYrgybWb owbWrbwowg Obr Rgo wrYogygYbo yoyrYrbWrg");
             cube = new Cube(this);
-            // trace = cube.Scramble(50);
+            trace = cube.Scramble(50);
             font = Content.Load<SpriteFont>("MarioFont");
             
             // TODO: use this.Content to load your game content here
@@ -77,7 +84,6 @@ namespace Square_1NN
         int current = 0;
         List<string> log = new List<string>() { "" };
         int up = 0, down = 0;
-        double game_time = 0;
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -206,6 +212,7 @@ namespace Square_1NN
         }
         public void DrawTexture(Texture2D texture, Color tint, Vector2 position)
         {
+            if (texture == null) return;
             position = Vector2.Add(position, new Vector2(-texture.Width / 2, -texture.Height / 2));
             spriteBatch.Draw(texture, position, tint);
         }
