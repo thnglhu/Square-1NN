@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -33,7 +34,6 @@ namespace Square_1NN.Square1
         Highlight current = Highlight.NONE;
         readonly LayerBase[] layers;
         List<(Texture2D, Color, Vector2)> top = null, middle = null, bot = null;
-        Controller controller;
         Dictionary<char, Color> normal_map = new Dictionary<char, Color>()
         {
             ['w'] = Color.AntiqueWhite,
@@ -52,10 +52,12 @@ namespace Square_1NN.Square1
             ['b'] = new Color(98, 220, 255),
             ['o'] = new Color(255, 196, 106),
         };
+        IDisplayer displayer;
 
-        public Cube(Controller controller)
+        public Cube(IDisplayer displayer)
         {
-            Init(this.controller = controller);            
+            this.displayer = displayer;
+            Init(displayer.Manager());            
             layers = new LayerBase[3];
             layers[0] = TOP.Clone();
             layers[1] = MIDDLE.Clone();
@@ -71,9 +73,9 @@ namespace Square_1NN.Square1
         public void Display()
         {
             if (top == null || bot == null || middle == null) Prepare();
-            bot.ForEach(packed => controller.DrawTexture(packed.Item1, packed.Item2, packed.Item3));
-            middle.ForEach(packed => controller.DrawTexture(packed.Item1, packed.Item2, packed.Item3));
-            top.ForEach(packed => controller.DrawTexture(packed.Item1, packed.Item2, packed.Item3));
+            bot.ForEach(packed => displayer.DrawTexture(packed.Item1, packed.Item2, packed.Item3));
+            middle.ForEach(packed => displayer.DrawTexture(packed.Item1, packed.Item2, packed.Item3));
+            top.ForEach(packed => displayer.DrawTexture(packed.Item1, packed.Item2, packed.Item3));
         }
         public static bool InsideTriangle(int pos_x, int pos_y, int x, int y, int width, int height)
         {
@@ -313,7 +315,7 @@ namespace Square_1NN.Square1
             Act("\\");
             return result;
         }
-        private static void Init(Controller controller)
+        private static void Init(ContentManager manager)
         {
             if (init == false)
             {
@@ -328,26 +330,26 @@ namespace Square_1NN.Square1
                 large_bottom_side = new Texture2D[24];
                 for (int index = 1; index <= 12; index++)
                 {
-                    small_top[index - 1] = controller.Content.Load<Texture2D>($"Pieces/smallTop{index}");
-                    small_bottom[index - 1] = controller.Content.Load<Texture2D>($"Pieces/smallBottom{index}");
-                    large_top[index - 1] = controller.Content.Load<Texture2D>($"Pieces/largeTop{index}");
-                    large_bottom[index - 1] = controller.Content.Load<Texture2D>($"Pieces/largeBottom{index}");
-                    small_top_side[index - 1] = controller.Content.Load<Texture2D>($"Pieces/smallTopSide{index}");
-                    large_top_side[2 * (index - 1)] = controller.Content.Load<Texture2D>($"Pieces/largeTopSide{2 * index - 1}");
-                    large_top_side[2 * (index - 1) + 1] = controller.Content.Load<Texture2D>($"Pieces/largeTopSide{2 * index}");
-                    small_bottom_side[index - 1] = controller.Content.Load<Texture2D>($"Pieces/smallBottomSide{index}");
-                    large_bottom_side[2 * (index - 1)] = controller.Content.Load<Texture2D>($"Pieces/largeBottomSide{2 * index - 1}");
-                    large_bottom_side[2 * (index - 1) + 1] = controller.Content.Load<Texture2D>($"Pieces/largeBottomSide{2 * index}");
+                    small_top[index - 1] = manager.Load<Texture2D>($"Pieces/smallTop{index}");
+                    small_bottom[index - 1] = manager.Load<Texture2D>($"Pieces/smallBottom{index}");
+                    large_top[index - 1] = manager.Load<Texture2D>($"Pieces/largeTop{index}");
+                    large_bottom[index - 1] = manager.Load<Texture2D>($"Pieces/largeBottom{index}");
+                    small_top_side[index - 1] = manager.Load<Texture2D>($"Pieces/smallTopSide{index}");
+                    large_top_side[2 * (index - 1)] = manager.Load<Texture2D>($"Pieces/largeTopSide{2 * index - 1}");
+                    large_top_side[2 * (index - 1) + 1] = manager.Load<Texture2D>($"Pieces/largeTopSide{2 * index}");
+                    small_bottom_side[index - 1] = manager.Load<Texture2D>($"Pieces/smallBottomSide{index}");
+                    large_bottom_side[2 * (index - 1)] = manager.Load<Texture2D>($"Pieces/largeBottomSide{2 * index - 1}");
+                    large_bottom_side[2 * (index - 1) + 1] = manager.Load<Texture2D>($"Pieces/largeBottomSide{2 * index}");
                 }
                 middle_side = new Texture2D[12];
                 for (int index = 1; index <= 12; index++)
                 {
-                    middle_side[index - 1] = controller.Content.Load<Texture2D>($"Pieces/middleSide{index}");
+                    middle_side[index - 1] = manager.Load<Texture2D>($"Pieces/middleSide{index}");
                 }
                 middle_top = new Texture2D[8];
                 for (int index = 1; index <= 8; index++)
                 {
-                    middle_top[index - 1] = controller.Content.Load<Texture2D>($"Pieces/middleTop{index}");
+                    middle_top[index - 1] = manager.Load<Texture2D>($"Pieces/middleTop{index}");
                 }
             }
         }

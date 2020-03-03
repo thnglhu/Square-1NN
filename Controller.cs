@@ -7,8 +7,9 @@ using System.Collections.Generic;
 
 namespace Square_1NN
 {
-    interface IDisplayer
+    public interface IDisplayer
     {
+        ContentManager Manager();
         void DrawTexture(Texture2D texture, Color tint, Vector2 position);
     }
 
@@ -21,14 +22,12 @@ namespace Square_1NN
         SpriteBatch spriteBatch;
         Cube cube;
         SpriteFont font;
-        static public ContentManager Manager;
 
         public Controller()
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = 200;
             graphics.PreferredBackBufferHeight = 500;
-            Manager = Content;
             graphics.ApplyChanges();
             Content.RootDirectory = "Content";
         }
@@ -215,6 +214,11 @@ namespace Square_1NN
             if (texture == null) return;
             position = Vector2.Add(position, new Vector2(-texture.Width / 2, -texture.Height / 2));
             spriteBatch.Draw(texture, position, tint);
+        }
+
+        public ContentManager Manager()
+        {
+            return Content;
         }
     }
 }
