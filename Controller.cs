@@ -7,12 +7,6 @@ using System.Collections.Generic;
 
 namespace Square_1NN
 {
-    public interface IDisplayer
-    {
-        ContentManager Manager();
-        void DrawTexture(Texture2D texture, Color tint, Vector2 position);
-    }
-
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
@@ -22,6 +16,7 @@ namespace Square_1NN
         SpriteBatch spriteBatch;
         Cube cube;
         SpriteFont font;
+        Button button;
 
         public Controller()
         {
@@ -55,10 +50,10 @@ namespace Square_1NN
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
-            // cube = new Cube(this, "132132 132213 462 264 132213 132132");
-            // cube = new Cube(this, "wbWrbWgrYb ryryoybWbo Obr Rgo WgowgwowrYo gygYboYgr");
-            // cube = new Cube(this, "WogYrgybWb owbWrbwowg Obr Rgo wrYogygYbo yoyrYrbWrg");
             cube = new Cube(this);
+            cube.Locate(new Vector2(100, 200));
+            button = new Button(Content.Load<Texture2D>("Pieces/scramble-button-1"), Content.Load<Texture2D>("Pieces/scramble-button-2"));
+            button.Locate(new Vector2(25, 500-13));
             trace = cube.Scramble(50);
             font = Content.Load<SpriteFont>("MarioFont");
             
@@ -132,62 +127,71 @@ namespace Square_1NN
             //    }
             // }
             // TODO: Add your update logic here
-            KeyboardState state = Keyboard.GetState();
-            if (!space && state.IsKeyDown(Keys.Space))
-            {
-                int code = state.IsKeyDown(Keys.LeftShift) ? -1 : 1;
-                if (state.IsKeyDown(Keys.LeftControl))
-                {
-                    down += code;
-                    cube.Act(code + "'");
-                }
-                else
-                {
-                    up += code;
-                    cube.Act(code.ToString());
-                }
-                if (up > 6) up -= 12;
-                if (down > 6) down -= 12;
-                if (up < -5) up += 12;
-                if (down < -5) down -= 12;
-                space = true;
-            }
-            else if (space && state.IsKeyUp(Keys.Space))
-            {
-                space = false;
-            }
-            if (!rotate && state.IsKeyDown(Keys.R))
-            {
-                if (state.IsKeyDown(Keys.LeftControl)) cube.Act("\\");
-                else cube.Act("/");
-                log[current] += $"({up}, {down})/";
-                if (log[current].Length > 70)
-                {
-                    log.Add("");
-                    current++;
-                }
-                up = down = 0;
-                rotate = true;
-            }
-            else if (rotate && state.IsKeyUp(Keys.R))
-            {
-                rotate = false;
-            }
-            if (!middle && state.IsKeyDown(Keys.Tab))
-            {
-                middle = true;
-                cube.Act("=");
-            }
-            else if (middle && state.IsKeyUp(Keys.Tab))
-            {
-                middle = false;
-            }
+            //KeyboardState state = Keyboard.GetState();
+            //if (!space && state.IsKeyDown(Keys.Space))
+            //{
+            //    int code = state.IsKeyDown(Keys.LeftShift) ? -1 : 1;
+            //    if (state.IsKeyDown(Keys.LeftControl))
+            //    {
+            //        down += code;
+            //        cube.Act(code + "'");
+            //    }
+            //    else
+            //    {
+            //        up += code;
+            //        cube.Act(code.ToString());
+            //    }
+            //    if (up > 6) up -= 12;
+            //    if (down > 6) down -= 12;
+            //    if (up < -5) up += 12;
+            //    if (down < -5) down -= 12;
+            //    space = true;
+            //}
+            //else if (space && state.IsKeyUp(Keys.Space))
+            //{
+            //    space = false;
+            //}
+            //if (!rotate && state.IsKeyDown(Keys.R))
+            //{
+            //    if (state.IsKeyDown(Keys.LeftControl)) cube.Act("\\");
+            //    else cube.Act("/");
+            //    log[current] += $"({up}, {down})/";
+            //    if (log[current].Length > 70)
+            //    {
+            //        log.Add("");
+            //        current++;
+            //    }
+            //    up = down = 0;
+            //    rotate = true;
+            //}
+            //else if (rotate && state.IsKeyUp(Keys.R))
+            //{
+            //    rotate = false;
+            //}
+            //if (!middle && state.IsKeyDown(Keys.Tab))
+            //{
+            //    middle = true;
+            //    cube.Act("=");
+            //}
+            //else if (middle && state.IsKeyUp(Keys.Tab))
+            //{
+            //    middle = false;
+            //}
             MouseState mouse = Mouse.GetState();
             cube.MouseMove(mouse.X, mouse.Y);
-            if (mouse.LeftButton == ButtonState.Pressed) cube.Lock(mouse.X, mouse.Y);
-            if (mouse.LeftButton == ButtonState.Released) cube.Unlock();
+            if (mouse.LeftButton == ButtonState.Pressed && released)
+            {
+                cube.Lock(mouse.X, mouse.Y);
+                released = false;
+            }
+            if (mouse.LeftButton == ButtonState.Released)
+            {
+                cube.Unlock();
+                released = true;
+            }
             base.Update(gameTime);
         }
+        bool released = true;
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -199,8 +203,8 @@ namespace Square_1NN
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            cube.Display();
-            spriteBatch.DrawString(font, $"({up}, {down})", new Vector2(300, 20), Color.Black);
+            cube.Display(this);
+            button.Display(this);
             for (int index = 0; index < log.Count; index++)
             {
                 spriteBatch.DrawString(font, log[index], new Vector2(300, 40 + 20 * index), Color.Black);
@@ -214,6 +218,10 @@ namespace Square_1NN
             if (texture == null) return;
             position = Vector2.Add(position, new Vector2(-texture.Width / 2, -texture.Height / 2));
             spriteBatch.Draw(texture, position, tint);
+        }
+        public void DrawString(SpriteFont font, string text, Color tint, Vector2 position)
+        {
+            spriteBatch.DrawString(font, text, position - font.MeasureString(text) / 2, tint);
         }
 
         public ContentManager Manager()

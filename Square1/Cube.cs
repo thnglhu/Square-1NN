@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Square_1NN.Square1
 {
-    public class Cube
+    public class Cube : IDrawingObject
     {
         private enum Highlight
         {
@@ -29,8 +29,9 @@ namespace Square_1NN.Square1
         static Texture2D[] middle_side;
         static Texture2D[] middle_top;
         static bool init = false;
-        Vector2 center = new Vector2(100, 100);
-        Vector2 center2 = new Vector2(100, 300);
+        Vector2 position = Vector2.Zero;
+        Vector2 center = new Vector2(0, -100);
+        Vector2 center2 = new Vector2(0, 100);
         Highlight current = Highlight.NONE;
         readonly LayerBase[] layers;
         List<(Texture2D, Color, Vector2)> top = null, middle = null, bot = null;
@@ -52,11 +53,11 @@ namespace Square_1NN.Square1
             ['b'] = new Color(98, 220, 255),
             ['o'] = new Color(255, 196, 106),
         };
-        IDisplayer displayer;
+        // IDisplayer displayer;
 
         public Cube(IDisplayer displayer)
         {
-            this.displayer = displayer;
+            // this.displayer = displayer;
             Init(displayer.Manager());            
             layers = new LayerBase[3];
             layers[0] = TOP.Clone();
@@ -70,7 +71,7 @@ namespace Square_1NN.Square1
             layers[1] = new ColoredMiddleLayer(split[2] + " " + split[3]);
             layers[2] = new ColoredRearLayer(split[4] + " " + split[5]);
         }
-        public void Display()
+        public void Display(IDisplayer displayer)
         {
             if (top == null || bot == null || middle == null) Prepare();
             bot.ForEach(packed => displayer.DrawTexture(packed.Item1, packed.Item2, packed.Item3));
@@ -129,11 +130,11 @@ namespace Square_1NN.Square1
                 int code = chr - '0';
                 if (code == 2)
                 {
-                    bot.Add((small_bottom[index], Color.White, vector2));
+                    bot.Add((small_bottom[index], color['w'], vector2));
                 }
                 else if (code == 1)
                 {
-                    bot.Add((large_bottom[index], Color.White, vector2));
+                    bot.Add((large_bottom[index], color['w'], vector2));
                 }
                 index = (index + 1) % 12;
             }
@@ -145,24 +146,24 @@ namespace Square_1NN.Square1
             if (extract[0] == '4')
             {
                 middle.Add((middle_side[0], color[side_color[0]], vector2));
-                middle.Add((middle_top[0], Color.White, vector2));
+                middle.Add((middle_top[0], color['w'], vector2));
             }
             else
             {
                 middle.Add((middle_side[1], color[side_color[0]], vector2));
-                middle.Add((middle_top[1], Color.White, vector2));
+                middle.Add((middle_top[1], color['w'], vector2));
             }
             if (extract[6] == '2')
             {
                 middle.Add((middle_side[2], color[side_color[9]], vector2));
                 middle.Add((middle_side[3], color[side_color[11]], vector2));
-                middle.Add((middle_top[2], Color.White, vector2));
+                middle.Add((middle_top[2], color['w'], vector2));
             }
             else
             {
                 middle.Add((middle_side[4], color[side_color[9]], vector2));
                 middle.Add((middle_side[5], color[side_color[11]], vector2));
-                middle.Add((middle_top[3], Color.White, vector2));
+                middle.Add((middle_top[3], color['w'], vector2));
             }
         }
 
@@ -172,23 +173,23 @@ namespace Square_1NN.Square1
             {
                 middle.Add((middle_side[8], color[side_color[0]], vector2));
                 middle.Add((middle_side[9], color[side_color[1]], vector2));
-                middle.Add((middle_top[6], Color.White, vector2));
+                middle.Add((middle_top[6], color['w'], vector2));
             }
             else
             {
                 middle.Add((middle_side[10], color[side_color[0]], vector2));
                 middle.Add((middle_side[11], color[side_color[2]], vector2));
-                middle.Add((middle_top[7], Color.White, vector2));
+                middle.Add((middle_top[7], color['w'], vector2));
             }
             if (extract[6] == '2')
             {
                 middle.Add((middle_side[6], color[side_color[11]], vector2));
-                middle.Add((middle_top[4], Color.White, vector2));
+                middle.Add((middle_top[4], color['w'], vector2));
             }
             else
             {
                 middle.Add((middle_side[7], color[side_color[11]], vector2));
-                middle.Add((middle_top[5], Color.White, vector2));
+                middle.Add((middle_top[5], color['w'], vector2));
             }
         }
 
@@ -431,6 +432,7 @@ namespace Square_1NN.Square1
         {
             return 0;
         }
+        bool prevent = false;
         public void MouseMove(int x, int y)
         {
             if (!is_lock)
@@ -488,7 +490,7 @@ namespace Square_1NN.Square1
                 {
                     dx = 0;
                 }
-                if (dy < -60 || dy > 60)
+                if (!prevent && (dy < -60 || dy > 60))
                 {
                     if (top_highlight)
                     {
@@ -503,11 +505,12 @@ namespace Square_1NN.Square1
                     dx = 0;
                     if (dy < -60) dy += 60;
                     if (dy > 60) dy -= 60;
+                    Unlock();
                 }
                 if (dx > 20)
                 {
                     dy = 0;
-                    dx -= 20;
+                    dx = 0;
                     switch (current)
                     {
                         case Highlight.TOP:
@@ -518,11 +521,12 @@ namespace Square_1NN.Square1
                             break;
                         default: break;
                     }
+                    prevent = true;
                 }
                 else if (dx < -20)
                 {
                     dy = 0;
-                    dx += 20;
+                    dx = 0;
                     switch (current)
                     {
                         case Highlight.TOP:
@@ -533,6 +537,7 @@ namespace Square_1NN.Square1
                             break;
                         default: break;
                     }
+                    prevent = true;
                 }
                 px = x;
                 py = y;
@@ -545,6 +550,7 @@ namespace Square_1NN.Square1
             if (is_lock == false)
             {
                 is_lock = true;
+                prevent = false;
                 px = x;
                 py = y;
                 lx = x;
@@ -558,6 +564,13 @@ namespace Square_1NN.Square1
                 is_lock = false;
                 dx = dy = 0;
             }
+        }
+
+        public void Locate(Vector2 position)
+        {
+            this.position = position;
+            center = position - new Vector2(0, 100);
+            center2 = position + new Vector2(0, 100);
         }
     }
 }
