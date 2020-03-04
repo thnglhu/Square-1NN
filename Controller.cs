@@ -16,7 +16,7 @@ namespace Square_1NN
         SpriteBatch spriteBatch;
         Cube cube;
         SpriteFont font;
-        Button button;
+        ThreeStageButton button;
 
         public Controller()
         {
@@ -52,7 +52,10 @@ namespace Square_1NN
             spriteBatch = new SpriteBatch(GraphicsDevice);
             cube = new Cube(this);
             cube.Locate(new Vector2(100, 200));
-            button = new Button(Content.Load<Texture2D>("Pieces/scramble-button-1"), Content.Load<Texture2D>("Pieces/scramble-button-2"));
+            button = new ThreeStageButton(
+                Content.Load<Texture2D>("Pieces/scramble-button-1"), 
+                Content.Load<Texture2D>("Pieces/scramble-button-2"),
+                Content.Load<Texture2D>("Pieces/scramble-button-3"));
             button.Locate(new Vector2(25, 500-13));
             trace = cube.Scramble(50);
             font = Content.Load<SpriteFont>("MarioFont");
@@ -178,15 +181,18 @@ namespace Square_1NN
             //    middle = false;
             //}
             MouseState mouse = Mouse.GetState();
-            cube.MouseMove(mouse.X, mouse.Y);
+            cube.Update(mouse.X, mouse.Y);
+            button.Update(mouse.X, mouse.Y);
             if (mouse.LeftButton == ButtonState.Pressed && released)
             {
                 cube.Lock(mouse.X, mouse.Y);
+                button.Press(mouse.X, mouse.Y);
                 released = false;
             }
-            if (mouse.LeftButton == ButtonState.Released)
+            if (!released && mouse.LeftButton == ButtonState.Released)
             {
                 cube.Unlock();
+                button.Release();
                 released = true;
             }
             base.Update(gameTime);

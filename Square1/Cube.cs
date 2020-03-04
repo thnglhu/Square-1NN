@@ -433,7 +433,7 @@ namespace Square_1NN.Square1
             return 0;
         }
         bool prevent = false;
-        public void MouseMove(int x, int y)
+        public void Update(int x, int y)
         {
             if (!is_lock)
             {
