@@ -48,7 +48,7 @@ namespace Square_1NN
             // cube = new Cube(this, "wbWrbWgrYb ryryoybWbo Obr Rgo WgowgwowrYo gygYboYgr");
             // cube = new Cube(this, "WogYrgybWb owbWrbwowg Obr Rgo wrYogygYbo yoyrYrbWrg");
             cube = new Cube(this);
-            // trace = cube.Scramble(50);
+            trace = cube.Scramble(50);
             font = Content.Load<SpriteFont>("MarioFont");
             
             // TODO: use this.Content to load your game content here
