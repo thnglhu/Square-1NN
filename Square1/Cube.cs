@@ -71,6 +71,12 @@ namespace Square_1NN.Square1
             layers[1] = new ColoredMiddleLayer(split[2] + " " + split[3]);
             layers[2] = new ColoredRearLayer(split[4] + " " + split[5]);
         }
+        LinkedList<(int, int)> animation = null;
+        public void Animate(LinkedList<(int, int)> list)
+        {
+            next_time = 0;
+            animation = list;
+        }
         public void Display(IDisplayer displayer)
         {
             if (top == null || bot == null || middle == null) Prepare();
@@ -299,21 +305,32 @@ namespace Square_1NN.Square1
             }
             return result;
         }
-        public LinkedList<(int, int)> Scramble(int number)
+        public LinkedList<(int, int)> Scramble(int number, bool affect = true)
         {
+            LayerBase[] backup = new LayerBase[layers.Length];
+            for (int index = 0; index < layers.Length; index++)
+            {
+                backup[index] = layers[index].Clone();
+            }
             Random random = new Random();
             LinkedList<(int, int)> result = new LinkedList<(int, int)>();
             for (int index = 0; index < number; index++)
             {
                 List<(int, int)> available = GetAvailableMoves();
                 (int, int) pick = available[random.Next(available.Count)];
-                result.AddLast((-pick.Item1, -pick.Item2));
+                result.AddLast((pick.Item1, pick.Item2));
                 Act($"{pick.Item1}");
                 Act($"{pick.Item2}'");
                 Act("\\");
             }
-            // if (random.Next(2) == 1) Act("=");
             Act("\\");
+            if (!affect)
+            {
+                for (int index = 0; index < layers.Length; index++)
+                {
+                    layers[index] = backup[index];
+                }
+            }
             return result;
         }
         private static void Init(ContentManager manager)
@@ -433,119 +450,160 @@ namespace Square_1NN.Square1
             return 0;
         }
         bool prevent = false;
-        public void Update(int x, int y)
+        double next_time = 0;
+        public void Update(int x, int y, GameTime game_time)
         {
-            if (!is_lock)
+            if (animation == null)
             {
-                Highlight previous = current;
-                Vector2 clone = new Vector2(center.X, center.Y);
-                clone.X -= 70;
-                clone.Y += 40;
-                current = Highlight.NONE;
-                if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                if (!is_lock)
                 {
-                    current = Highlight.BOT;
-                    top_highlight = true;
-                }
-                clone.Y -= 26;
-                if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
-                {
-                    current = Highlight.MIDDLE;
-                    top_highlight = true;
-                }
-                clone.Y -= 26;
-                if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
-                {
-                    current = Highlight.TOP;
-                    top_highlight = true;
-                }
-                clone = new Vector2(center2.X, center2.Y);
-                clone.X -= 70;
-                clone.Y += 40;
-                if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
-                {
-                    current = Highlight.TOP;
-                    top_highlight = false;
-                }
-                clone.Y -= 26;
-                if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
-                {
-                    current = Highlight.MIDDLE;
-                    top_highlight = false;
-                }
-                clone.Y -= 26;
-                if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
-                {
-                    current = Highlight.BOT;
-                    top_highlight = false;
-                }
-                if (previous != current) Prepare();
+                    Highlight previous = current;
+                    Vector2 clone = new Vector2(center.X, center.Y);
+                    clone.X -= 70;
+                    clone.Y += 40;
+                    current = Highlight.NONE;
+                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                    {
+                        current = Highlight.BOT;
+                        top_highlight = true;
+                    }
+                    clone.Y -= 26;
+                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                    {
+                        current = Highlight.MIDDLE;
+                        top_highlight = true;
+                    }
+                    clone.Y -= 26;
+                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                    {
+                        current = Highlight.TOP;
+                        top_highlight = true;
+                    }
+                    clone = new Vector2(center2.X, center2.Y);
+                    clone.X -= 70;
+                    clone.Y += 40;
+                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                    {
+                        current = Highlight.TOP;
+                        top_highlight = false;
+                    }
+                    clone.Y -= 26;
+                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                    {
+                        current = Highlight.MIDDLE;
+                        top_highlight = false;
+                    }
+                    clone.Y -= 26;
+                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                    {
+                        current = Highlight.BOT;
+                        top_highlight = false;
+                    }
+                    if (previous != current) Prepare();
 
+                }
+                else if (current != Highlight.NONE)
+                {
+                    dx += x - px;
+                    dy += y - py;
+                    if (dy < -20 || dy > 20)
+                    {
+                        dx = 0;
+                    }
+                    if (!prevent && (dy < -60 || dy > 60))
+                    {
+                        if (top_highlight)
+                        {
+                            if (lx > center.X - 70 + 95) Act("/");
+                            else Act("\\");
+                        }
+                        else
+                        {
+                            if (lx > center.X - 70 + 45) Act("/");
+                            else Act("\\");
+                        }
+                        dx = 0;
+                        if (dy < -60) dy += 60;
+                        if (dy > 60) dy -= 60;
+                        Release();
+                    }
+                    if (dx > 20)
+                    {
+                        dy = 0;
+                        dx = 0;
+                        switch (current)
+                        {
+                            case Highlight.TOP:
+                                Act(top_highlight ? "-1" : "1");
+                                break;
+                            case Highlight.BOT:
+                                Act(top_highlight ? "1'" : "-1'");
+                                break;
+                            default: break;
+                        }
+                        prevent = true;
+                    }
+                    else if (dx < -20)
+                    {
+                        dy = 0;
+                        dx = 0;
+                        switch (current)
+                        {
+                            case Highlight.TOP:
+                                Act(top_highlight ? "1" : "-1");
+                                break;
+                            case Highlight.BOT:
+                                Act(top_highlight ? "-1'" : "1'");
+                                break;
+                            default: break;
+                        }
+                        prevent = true;
+                    }
+                    px = x;
+                    py = y;
+                }
             }
-            else if (current != Highlight.NONE)
+            else
             {
-                dx += x - px;
-                dy += y - py;
-                if (dy < -20 || dy > 20)
+                double time = game_time.TotalGameTime.TotalMilliseconds;
+                if (next_time < time) next_time = time + 100;
+                else return;
+                LinkedListNode<(int, int)> head = animation.First;
+                if (head == null)
                 {
-                    dx = 0;
+                    animation = null;
                 }
-                if (!prevent && (dy < -60 || dy > 60))
+                else if (head.Value.Item1 < 0)
                 {
-                    if (top_highlight)
-                    {
-                        if (lx > center.X - 70 + 95) Act("/");
-                        else Act("\\");
-                    }
-                    else
-                    {
-                        if (lx > center.X - 70 + 45) Act("/");
-                        else Act("\\");
-                    }
-                    dx = 0;
-                    if (dy < -60) dy += 60;
-                    if (dy > 60) dy -= 60;
-                    Unlock();
+                    Act("1");
+                    head.Value = (head.Value.Item1 + 1, head.Value.Item2);
                 }
-                if (dx > 20)
+                else if (head.Value.Item1 > 0)
                 {
-                    dy = 0;
-                    dx = 0;
-                    switch (current)
-                    {
-                        case Highlight.TOP:
-                            Act(top_highlight ? "-1" : "1");
-                            break;
-                        case Highlight.BOT:
-                            Act(top_highlight ? "1'" : "-1'");
-                            break;
-                        default: break;
-                    }
-                    prevent = true;
+                    Act("-1");
+                    head.Value = (head.Value.Item1 - 1, head.Value.Item2);
                 }
-                else if (dx < -20)
+                else if (head.Value.Item2 < 0)
                 {
-                    dy = 0;
-                    dx = 0;
-                    switch (current)
-                    {
-                        case Highlight.TOP:
-                            Act(top_highlight ? "1" : "-1");
-                            break;
-                        case Highlight.BOT:
-                            Act(top_highlight ? "-1'" : "1'");
-                            break;
-                        default: break;
-                    }
-                    prevent = true;
+                    Act("1'");
+                    head.Value = (head.Value.Item1, head.Value.Item2 + 1);
                 }
-                px = x;
-                py = y;
+                else if (head.Value.Item2 > 0)
+                {
+                    Act("-1'");
+                    head.Value = (head.Value.Item1, head.Value.Item2 - 1);
+                }
+                else
+                {
+                    Act("\\");
+                    // animation = null;
+                    animation.RemoveFirst();
+                }
             }
         }
         int dx = 0, dy = 0, px = 0, py = 0, lx = 0, ly = 0;
         bool is_lock = false;
-        public void Lock(int x, int y)
+        public void Press(int x, int y)
         {
             if (is_lock == false)
             {
@@ -557,7 +615,7 @@ namespace Square_1NN.Square1
                 ly = y;
             }
         }
-        public void Unlock()
+        public void Release()
         {
             if (is_lock == true)
             {

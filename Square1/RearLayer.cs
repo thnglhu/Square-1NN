@@ -45,6 +45,7 @@ namespace Square_1NN.Square1
         }
         public List<int> GetAvailableMoves()
         {
+            // TODO: Not working properly
             string full = Minor + Major + Minor + Major;
             int start = Minor.Length;
             List<int> result = new List<int>();

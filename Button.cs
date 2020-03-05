@@ -10,14 +10,17 @@ namespace Square_1NN
 {
     class ThreeStageButton : IDrawingObject
     {
+        public delegate void ActivationFunction();
+        ActivationFunction activation;
         Texture2D normal, hover, click, current;
         Vector2 position = Vector2.Zero, A, B;
-        public ThreeStageButton(Texture2D normal, Texture2D click, Texture2D hover)
+        public ThreeStageButton(Texture2D normal, Texture2D click, Texture2D hover, ActivationFunction function = null)
         {
             current = this.normal = normal;
             this.hover = hover;
             this.click = click;
             Locate(position);
+            activation = function;
         }
         public void Display(IDisplayer displayer)
         {
@@ -50,7 +53,11 @@ namespace Square_1NN
         }
         public void Release()
         {
-            if (current == click) current = normal;
+            if (current == click)
+            {
+                current = normal;
+                activation?.Invoke();
+            }
         }
     }
 }

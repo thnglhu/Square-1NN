@@ -52,12 +52,25 @@ namespace Square_1NN
             spriteBatch = new SpriteBatch(GraphicsDevice);
             cube = new Cube(this);
             cube.Locate(new Vector2(100, 200));
+            void Scramble()
+            {
+                LinkedList<(int, int)> list = cube.Scramble(50, false);
+                LinkedListNode<(int, int)> last = list.Last;
+                list.AddLast((0, 0));
+                while (last != null)
+                {
+                    list.AddLast((-last.Value.Item1, -last.Value.Item2));
+                    last = last.Previous;
+                }
+                list.AddLast((0, 0));
+                cube.Animate(list);
+            }
             button = new ThreeStageButton(
                 Content.Load<Texture2D>("Pieces/scramble-button-1"), 
                 Content.Load<Texture2D>("Pieces/scramble-button-2"),
-                Content.Load<Texture2D>("Pieces/scramble-button-3"));
+                Content.Load<Texture2D>("Pieces/scramble-button-3"),
+                Scramble);            
             button.Locate(new Vector2(25, 500-13));
-            trace = cube.Scramble(50);
             font = Content.Load<SpriteFont>("MarioFont");
             
             // TODO: use this.Content to load your game content here
@@ -181,17 +194,17 @@ namespace Square_1NN
             //    middle = false;
             //}
             MouseState mouse = Mouse.GetState();
-            cube.Update(mouse.X, mouse.Y);
+            cube.Update(mouse.X, mouse.Y, gameTime);
             button.Update(mouse.X, mouse.Y);
             if (mouse.LeftButton == ButtonState.Pressed && released)
             {
-                cube.Lock(mouse.X, mouse.Y);
+                cube.Press(mouse.X, mouse.Y);
                 button.Press(mouse.X, mouse.Y);
                 released = false;
             }
             if (!released && mouse.LeftButton == ButtonState.Released)
             {
-                cube.Unlock();
+                cube.Release();
                 button.Release();
                 released = true;
             }

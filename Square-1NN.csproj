@@ -54,8 +54,6 @@
     <Compile Include="Square1\ColoredRearLayer.cs" />
     <Compile Include="Square1\Cube.cs" />
     <Compile Include="Square1\LayerBase.cs" />
-    <Compile Include="Square1\Layer\Class1.cs" />
-    <Compile Include="Square1\Layer\ILayer.cs" />
     <Compile Include="Square1\MiddleLayer.cs" />
     <Compile Include="Square1\RearLayer.cs" />
   </ItemGroup>
