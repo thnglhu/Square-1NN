@@ -3,13 +3,14 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Square_1NN.Square1
 {
-    public class Cube : IDrawingObject
+    public class Cube : IInteractable
     {
         private enum Highlight
         {
@@ -27,13 +28,16 @@ namespace Square_1NN.Square1
         static Texture2D[] large_top_side;
         static Texture2D[] large_bottom_side;
         static Texture2D[] middle_side;
-        static Texture2D[] middle_top;
+        static Texture2D[] middle_top;  
         static bool init = false;
         Vector2 position = Vector2.Zero;
         Vector2 center = new Vector2(0, -100);
         Vector2 center2 = new Vector2(0, 100);
         Highlight current = Highlight.NONE;
         readonly LayerBase[] layers;
+        internal ColoredRearLayer Top { get; set; }
+        internal ColoredMiddleLayer Mid { get; set; }
+        internal ColoredRearLayer Bot { get; set; }
         List<(Texture2D, Color, Vector2)> top = null, middle = null, bot = null;
         Dictionary<char, Color> normal_map = new Dictionary<char, Color>()
         {
@@ -236,7 +240,7 @@ namespace Square_1NN.Square1
             }
         }
 
-        public bool Act(string code)
+        public bool Control(string code)
         {
             if (code == "=") layers[1].Shift(true);
             else if (code == "/")
@@ -288,7 +292,6 @@ namespace Square_1NN.Square1
                 select.Shift(value);
             }
             bot = middle = top = null;
-            PrintHash();
             return true;
         }
         public List<(int, int)> GetAvailableMoves()
@@ -319,11 +322,10 @@ namespace Square_1NN.Square1
                 List<(int, int)> available = GetAvailableMoves();
                 (int, int) pick = available[random.Next(available.Count)];
                 result.AddLast((pick.Item1, pick.Item2));
-                Act($"{pick.Item1}");
-                Act($"{pick.Item2}'");
-                Act("\\");
+                Debug.Assert(Control($"{pick.Item1}"));
+                Debug.Assert(Control($"{pick.Item2}'"));
+                Debug.Assert(Control("/"));
             }
-            Act("\\");
             if (!affect)
             {
                 for (int index = 0; index < layers.Length; index++)
@@ -332,6 +334,14 @@ namespace Square_1NN.Square1
                 }
             }
             return result;
+        }
+        public void Reset()
+        {
+            animation = null;
+            layers[0] = TOP.Clone();
+            layers[1] = MIDDLE.Clone();
+            layers[2] = BOTTOM.Clone();
+            Prepare();
         }
         private static void Init(ContentManager manager)
         {
@@ -462,19 +472,22 @@ namespace Square_1NN.Square1
                     clone.X -= 70;
                     clone.Y += 40;
                     current = Highlight.NONE;
-                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) 
+                        || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
                     {
                         current = Highlight.BOT;
                         top_highlight = true;
                     }
                     clone.Y -= 26;
-                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) 
+                        || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
                     {
                         current = Highlight.MIDDLE;
                         top_highlight = true;
                     }
                     clone.Y -= 26;
-                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 55, 139, 55) 
+                        || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
                     {
                         current = Highlight.TOP;
                         top_highlight = true;
@@ -482,19 +495,22 @@ namespace Square_1NN.Square1
                     clone = new Vector2(center2.X, center2.Y);
                     clone.X -= 70;
                     clone.Y += 40;
-                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) 
+                        || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
                     {
                         current = Highlight.TOP;
                         top_highlight = false;
                     }
                     clone.Y -= 26;
-                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) 
+                        || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
                     {
                         current = Highlight.MIDDLE;
                         top_highlight = false;
                     }
                     clone.Y -= 26;
-                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 55, 139, 55) 
+                        || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
                     {
                         current = Highlight.BOT;
                         top_highlight = false;
@@ -514,13 +530,13 @@ namespace Square_1NN.Square1
                     {
                         if (top_highlight)
                         {
-                            if (lx > center.X - 70 + 95) Act("/");
-                            else Act("\\");
+                            if (lx > center.X - 70 + 95) Control("/");
+                            else Control("\\");
                         }
                         else
                         {
-                            if (lx > center.X - 70 + 45) Act("/");
-                            else Act("\\");
+                            if (lx > center.X - 70 + 45) Control("/");
+                            else Control("\\");
                         }
                         dx = 0;
                         if (dy < -60) dy += 60;
@@ -534,10 +550,10 @@ namespace Square_1NN.Square1
                         switch (current)
                         {
                             case Highlight.TOP:
-                                Act(top_highlight ? "-1" : "1");
+                                Control(top_highlight ? "-1" : "1");
                                 break;
                             case Highlight.BOT:
-                                Act(top_highlight ? "1'" : "-1'");
+                                Control(top_highlight ? "1'" : "-1'");
                                 break;
                             default: break;
                         }
@@ -550,10 +566,10 @@ namespace Square_1NN.Square1
                         switch (current)
                         {
                             case Highlight.TOP:
-                                Act(top_highlight ? "1" : "-1");
+                                Control(top_highlight ? "1" : "-1");
                                 break;
                             case Highlight.BOT:
-                                Act(top_highlight ? "-1'" : "1'");
+                                Control(top_highlight ? "-1'" : "1'");
                                 break;
                             default: break;
                         }
@@ -566,7 +582,7 @@ namespace Square_1NN.Square1
             else
             {
                 double time = game_time.TotalGameTime.TotalMilliseconds;
-                if (next_time < time) next_time = time + 100;
+                if (next_time < time) next_time = time + 50;
                 else return;
                 LinkedListNode<(int, int)> head = animation.First;
                 if (head == null)
@@ -575,27 +591,29 @@ namespace Square_1NN.Square1
                 }
                 else if (head.Value.Item1 < 0)
                 {
-                    Act("1");
+                    Control("-1");
                     head.Value = (head.Value.Item1 + 1, head.Value.Item2);
                 }
                 else if (head.Value.Item1 > 0)
                 {
-                    Act("-1");
+                    Control("1");
                     head.Value = (head.Value.Item1 - 1, head.Value.Item2);
                 }
                 else if (head.Value.Item2 < 0)
                 {
-                    Act("1'");
+                    Control("-1'");
                     head.Value = (head.Value.Item1, head.Value.Item2 + 1);
                 }
                 else if (head.Value.Item2 > 0)
                 {
-                    Act("-1'");
+                    Control("+1'");
                     head.Value = (head.Value.Item1, head.Value.Item2 - 1);
                 }
                 else
                 {
-                    Act("\\");
+                    //Debug.Assert(Act($"{head.Value.Item1}"));
+                    //Debug.Assert(Act($"{head.Value.Item2}'"));
+                    Debug.Assert(Control("/"));                    
                     // animation = null;
                     animation.RemoveFirst();
                 }

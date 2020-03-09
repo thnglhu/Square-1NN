@@ -42,10 +42,10 @@ namespace Square_1NN.Square1
             MajorSideColor = MinorSideColor;
             MinorSideColor = temp;
         }
-        public override void Reverse(bool for_major)
+        public override void Reverse(bool forMajor)
         {
-            base.Reverse(for_major);
-            if (for_major)
+            base.Reverse(forMajor);
+            if (forMajor)
             {
                 Reverse(ref major_side_color);
             }

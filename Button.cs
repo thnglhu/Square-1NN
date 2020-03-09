@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Square_1NN
 {
-    class ThreeStageButton : IDrawingObject
+    class ThreeStageButton : IInteractable
     {
         public delegate void ActivationFunction();
         ActivationFunction activation;
@@ -33,7 +33,7 @@ namespace Square_1NN
             A = position - size / 2;
             B = position + size / 2;
         }
-        public void Update(int x, int y)
+        public void Update(int x, int y, GameTime _)
         {
             if (current == normal && x >= A.X && x <= B.X && y >= A.Y && y <= B.Y)
             {

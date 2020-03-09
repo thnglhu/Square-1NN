@@ -47,12 +47,15 @@
     <Compile Include="Controller.cs" />
     <Compile Include="CubeLite.cs" />
     <Compile Include="IDisplayer.cs" />
-    <Compile Include="IDrawingObject.cs" />
+    <Compile Include="IDrawableObject.cs" />
+    <Compile Include="IInteractable.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Square1\ColoredMiddleLayer.cs" />
     <Compile Include="Square1\ColoredRearLayer.cs" />
     <Compile Include="Square1\Cube.cs" />
+    <Compile Include="Square1\CubeController.cs" />
+    <Compile Include="Square1\CubeView.cs" />
     <Compile Include="Square1\LayerBase.cs" />
     <Compile Include="Square1\MiddleLayer.cs" />
     <Compile Include="Square1\RearLayer.cs" />

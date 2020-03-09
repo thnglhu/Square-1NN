@@ -16,8 +16,7 @@ namespace Square_1NN
         SpriteBatch spriteBatch;
         Cube cube;
         SpriteFont font;
-        ThreeStageButton button;
-
+        HashSet<IInteractable> interactables;
         public Controller()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -50,27 +49,35 @@ namespace Square_1NN
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            interactables = new HashSet<IInteractable>();
             cube = new Cube(this);
             cube.Locate(new Vector2(100, 200));
-            void Scramble()
-            {
-                LinkedList<(int, int)> list = cube.Scramble(50, false);
-                LinkedListNode<(int, int)> last = list.Last;
-                list.AddLast((0, 0));
-                while (last != null)
-                {
-                    list.AddLast((-last.Value.Item1, -last.Value.Item2));
-                    last = last.Previous;
-                }
-                list.AddLast((0, 0));
-                cube.Animate(list);
-            }
-            button = new ThreeStageButton(
+
+            ThreeStageButton scramble_button = new ThreeStageButton(
                 Content.Load<Texture2D>("Pieces/scramble-button-1"), 
                 Content.Load<Texture2D>("Pieces/scramble-button-2"),
                 Content.Load<Texture2D>("Pieces/scramble-button-3"),
-                Scramble);            
-            button.Locate(new Vector2(25, 500-13));
+                () => {
+                    LinkedList<(int, int)> list = cube.Scramble(14, false);
+                    LinkedListNode<(int, int)> last = list.Last;
+                    list.AddLast((0, 0));
+                    cube.Animate(list);
+                });
+
+            ThreeStageButton reset_button = new ThreeStageButton(
+                Content.Load<Texture2D>("Pieces/reset-button-1"),
+                Content.Load<Texture2D>("Pieces/reset-button-2"),
+                Content.Load<Texture2D>("Pieces/reset-button-3"),
+                () => cube.Reset()
+                );
+
+            scramble_button.Locate(new Vector2(25, 500 - 13));
+            reset_button.Locate(new Vector2(125, 500 - 13));
+
+            interactables.Add(scramble_button);
+            interactables.Add(reset_button);
+            interactables.Add(cube);
+
             font = Content.Load<SpriteFont>("MarioFont");
             
             // TODO: use this.Content to load your game content here
@@ -90,122 +97,29 @@ namespace Square_1NN
         /// checking for collisions, gathering input, and playing audio.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        bool space = false, rotate = false, middle = false;
-        int current = 0;
-        List<string> log = new List<string>() { "" };
-        int up = 0, down = 0;
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            //game_time += gameTime.ElapsedGameTime.TotalSeconds;
-            //if (game_time >= 0.01)
-            //{
-            //    game_time -= 0.01;
-            //    if (trace != null && trace.Count > 0)
-            //    {
-            //        LinkedListNode<(int, int)> last = trace.Last;
-
-            //        if (last.Value.Item1 == 0 && last.Value.Item2 == 0)
-            //        {
-            //            cube.Act("\\");
-            //            trace.RemoveLast();
-            //        }
-            //        else
-            //        {
-            //            if (last.Value.Item1 < 0)
-            //            {
-            //                cube.Act("-1");
-            //                last.Value = (last.Value.Item1 + 1, last.Value.Item2);
-            //            }
-            //            else if (last.Value.Item1 > 0)
-            //            {
-            //                cube.Act("1");
-            //                last.Value = (last.Value.Item1 - 1, last.Value.Item2);
-            //            }
-            //            else if (last.Value.Item2 < 0)
-            //            {
-            //                cube.Act("-1'");
-            //                last.Value = (last.Value.Item1, last.Value.Item2 + 1);
-            //            }
-            //            else if (last.Value.Item2 > 0)
-            //            {
-            //                cube.Act("1'");
-            //                last.Value = (last.Value.Item1, last.Value.Item2 - 1);
-            //            }
-
-            //        }
-            //    }
-            //    else if (trace != null)
-            //    {
-            //        cube.Act("\\");
-            //        trace = null;
-            //    }
-            // }
-            // TODO: Add your update logic here
-            //KeyboardState state = Keyboard.GetState();
-            //if (!space && state.IsKeyDown(Keys.Space))
-            //{
-            //    int code = state.IsKeyDown(Keys.LeftShift) ? -1 : 1;
-            //    if (state.IsKeyDown(Keys.LeftControl))
-            //    {
-            //        down += code;
-            //        cube.Act(code + "'");
-            //    }
-            //    else
-            //    {
-            //        up += code;
-            //        cube.Act(code.ToString());
-            //    }
-            //    if (up > 6) up -= 12;
-            //    if (down > 6) down -= 12;
-            //    if (up < -5) up += 12;
-            //    if (down < -5) down -= 12;
-            //    space = true;
-            //}
-            //else if (space && state.IsKeyUp(Keys.Space))
-            //{
-            //    space = false;
-            //}
-            //if (!rotate && state.IsKeyDown(Keys.R))
-            //{
-            //    if (state.IsKeyDown(Keys.LeftControl)) cube.Act("\\");
-            //    else cube.Act("/");
-            //    log[current] += $"({up}, {down})/";
-            //    if (log[current].Length > 70)
-            //    {
-            //        log.Add("");
-            //        current++;
-            //    }
-            //    up = down = 0;
-            //    rotate = true;
-            //}
-            //else if (rotate && state.IsKeyUp(Keys.R))
-            //{
-            //    rotate = false;
-            //}
-            //if (!middle && state.IsKeyDown(Keys.Tab))
-            //{
-            //    middle = true;
-            //    cube.Act("=");
-            //}
-            //else if (middle && state.IsKeyUp(Keys.Tab))
-            //{
-            //    middle = false;
-            //}
             MouseState mouse = Mouse.GetState();
-            cube.Update(mouse.X, mouse.Y, gameTime);
-            button.Update(mouse.X, mouse.Y);
+            foreach (IInteractable interactable in interactables)
+            {
+                interactable.Update(mouse.X, mouse.Y, gameTime);
+            }
             if (mouse.LeftButton == ButtonState.Pressed && released)
             {
-                cube.Press(mouse.X, mouse.Y);
-                button.Press(mouse.X, mouse.Y);
+                foreach (IInteractable interactable in interactables)
+                {
+                    interactable.Press(mouse.X, mouse.Y);
+                }
                 released = false;
             }
             if (!released && mouse.LeftButton == ButtonState.Released)
             {
-                cube.Release();
-                button.Release();
+                foreach (IInteractable interactable in interactables)
+                {
+                    interactable.Release();
+                }
                 released = true;
             }
             base.Update(gameTime);
@@ -222,11 +136,9 @@ namespace Square_1NN
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            cube.Display(this);
-            button.Display(this);
-            for (int index = 0; index < log.Count; index++)
+            foreach (IInteractable interactable in interactables)
             {
-                spriteBatch.DrawString(font, log[index], new Vector2(300, 40 + 20 * index), Color.Black);
+                interactable.Display(this);
             }
             spriteBatch.End();
 

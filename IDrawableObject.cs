@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Square_1NN
 {
-    interface IDrawingObject
+    interface IDrawableObject
     {
         void Display(IDisplayer displayer);
         void Locate(Vector2 position);

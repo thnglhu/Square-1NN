@@ -55,10 +55,10 @@ namespace Square_1NN.Square1
                 step++;
             }
         }
-        public virtual void Reverse(bool for_major)
+        public virtual void Reverse(bool forMajor)
         {
 
-            if (for_major) Reverse(ref major);
+            if (forMajor) Reverse(ref major);
             else Reverse(ref minor);
         }
         public static void Reverse(ref string target)
