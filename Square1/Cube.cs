@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Square_1NN.Extension;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -469,6 +470,7 @@ namespace Square_1NN.Square1
                 {
                     Highlight previous = current;
                     Vector2 clone = new Vector2(center.X, center.Y);
+                    // (0, 0)
                     clone.X -= 70;
                     clone.Y += 40;
                     current = Highlight.NONE;
@@ -478,6 +480,7 @@ namespace Square_1NN.Square1
                         current = Highlight.BOT;
                         top_highlight = true;
                     }
+                    // (-70, 40)
                     clone.Y -= 26;
                     if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) 
                         || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using System;
+using Square_1NN.Extension;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
