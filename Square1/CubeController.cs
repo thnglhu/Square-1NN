@@ -58,6 +58,45 @@ namespace Square_1NN.Square1
         }
 
         #region Control State
+        
+        internal bool RotateMajor()
+        {
+            if (!cube.Top.Rotatable()
+                || !cube.Mid.Rotatable()
+                || !cube.Bot.Rotatable())
+                return false;
+            cube.Top.Reverse(forMajor: true);
+            cube.Mid.Reverse(forMajor: true);
+            cube.Bot.Reverse(forMajor: true);
+            (cube.Top.Major, cube.Bot.Major) = (cube.Bot.Major, cube.Top.Major);
+            (cube.Top.MajorColor, cube.Bot.MajorColor) = (cube.Bot.MajorColor, cube.Top.MajorColor);
+            view.Update(cube, center, center2, 0);
+            return true;
+        }
+        internal bool RotateMinor()
+        {
+            if (cube.Top.Rotatable() && cube.Mid.Rotatable() && cube.Bot.Rotatable())
+            {
+                cube.Top.Reverse(forMajor: false);
+                cube.Mid.Reverse(forMajor: false);
+                cube.Bot.Reverse(forMajor: false);
+                (cube.Top.Minor, cube.Bot.Minor) = (cube.Bot.Minor, cube.Top.Minor);
+                (cube.Top.MinorColor, cube.Bot.MinorColor) = (cube.Bot.MinorColor, cube.Top.MinorColor);
+                view.Update(cube, center, center2, 0);
+                return true;
+            }
+            return false;
+        }
+        internal void ShiftTop(int value)
+        {
+            cube.Top.Shift(value);
+            view.UpdateTop(cube, center, center2, 0);
+        }
+        internal void ShiftBot(int value)
+        {
+            cube.Bot.Shift(-value);
+            view.UpdateBot(cube, center, center2, 0);
+        }
         public void Update(int x, int y, GameTime game_time)
         {
             if (!lockLayer)
@@ -142,45 +181,18 @@ namespace Square_1NN.Square1
                 }
             }
         }
-        internal bool RotateMajor()
+        internal void Scramble(int number, bool forAnimation = false)
         {
-            if (!cube.Top.Rotatable()
-                || !cube.Mid.Rotatable()
-                || !cube.Bot.Rotatable())
-                return false;
-            cube.Top.Reverse(forMajor: true);
-            cube.Mid.Reverse(forMajor: true);
-            cube.Bot.Reverse(forMajor: true);
-            (cube.Top.Major, cube.Bot.Major) = (cube.Bot.Major, cube.Top.Major);
-            (cube.Top.MajorColor, cube.Bot.MajorColor) = (cube.Bot.MajorColor, cube.Top.MajorColor);
-            view.Update(cube, center, center2, 0);
-            return true;
-        }
-        internal bool RotateMinor()
-        {
-            if (!cube.Top.Rotatable()
-                || !cube.Mid.Rotatable()
-                || !cube.Bot.Rotatable())
-                return false;
-            cube.Top.Reverse(forMajor: false);
-            cube.Mid.Reverse(forMajor: false);
-            cube.Bot.Reverse(forMajor: false);
-            (cube.Top.Minor, cube.Bot.Minor) = (cube.Bot.Minor, cube.Top.Minor);
-            (cube.Top.MinorColor, cube.Bot.MinorColor) = (cube.Bot.MinorColor, cube.Top.MinorColor);
-            view.Update(cube, center, center2, 0);
-            return true;
-        }
-        internal void ShiftTop(int value)
-        {
-            cube.Top.Shift(value);
-            view.UpdateTop(cube, center, center2, 0);
-        }
-        internal void ShiftBot(int value)
-        {
-            cube.Bot.Shift(-value);
-            view.UpdateBot(cube, center, center2, 0);
+            Cube backup = cube.Clone();
+            Random random = new Random();
+            Queue<(int, int)> queue = new Queue<(int, int)>();
+            for (int index = 0; index < number; index++)
+            {
+                List<(int, int)> available = cube.GetAvailableMoves();
+                (int, int) randomPick = available[random.Next(available.Count)];
+                queue.Enqueue(randomPick);
+            }
         }
         #endregion
-
     }
 }

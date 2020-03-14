@@ -178,6 +178,11 @@ namespace Square_1NN.Square1
             }
         }
 
+        internal Cube Clone()
+        {
+            throw new NotImplementedException();
+        }
+
         private void DisplayAlternativeMiddle(Vector2 vector2, string extract, string side_color, Dictionary<char, Color> color)
         {
             if (extract[0] == '4')
