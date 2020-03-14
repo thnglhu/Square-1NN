@@ -473,24 +473,26 @@ namespace Square_1NN.Square1
                     // (0, 0)
                     clone.X -= 70;
                     clone.Y += 40;
+                    // (-70, 40)
                     current = Highlight.NONE;
-                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) 
-                        || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) // (-70, 17)
+                        || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33)) // (-70, 0)
                     {
                         current = Highlight.BOT;
                         top_highlight = true;
                     }
-                    // (-70, 40)
                     clone.Y -= 26;
-                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) 
-                        || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                    // (-70, 14)
+                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) // (-70, -9)
+                        || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33)) // (-70, 14)
                     {
                         current = Highlight.MIDDLE;
                         top_highlight = true;
                     }
+                    // (-70, -12)
                     clone.Y -= 26;
-                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 55, 139, 55) 
-                        || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
+                    if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 55, 139, 55) // (-70, -67)
+                        || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33)) // (-70, -12)
                     {
                         current = Highlight.TOP;
                         top_highlight = true;
@@ -498,6 +500,7 @@ namespace Square_1NN.Square1
                     clone = new Vector2(center2.X, center2.Y);
                     clone.X -= 70;
                     clone.Y += 40;
+                    // (-70, 40)
                     if (InsideRectangle(x, y, (int)clone.X, (int)clone.Y - 23, 139, 23) 
                         || InsideTriangle(x, y, (int)clone.X, (int)clone.Y, 139, 33))
                     {

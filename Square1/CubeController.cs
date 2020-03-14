@@ -12,6 +12,7 @@ namespace Square_1NN.Square1
     {
         Cube cube;
         CubeView view;
+        Vector2 position;
         private Vector2 center = Vector2.Zero, center2 = Vector2.Zero;
         private static readonly Vector2 flippedDelta = new Vector2(0, 200);
         internal CubeController(Cube cube, CubeView view, IDisplayer displayer)
@@ -27,6 +28,7 @@ namespace Square_1NN.Square1
 
         public void Locate(Vector2 position)
         {
+            this.position = position;
             center = position - flippedDelta / 2;
             center2 = position + flippedDelta / 2;
         }
@@ -54,27 +56,92 @@ namespace Square_1NN.Square1
                 lockLayer = false;
             }
         }
+
+        #region Control State
         public void Update(int x, int y, GameTime game_time)
         {
-            Vector2 position = new Vector2(x, y);
             if (!lockLayer)
             {
                 int newFlag = 0;
-                int baseX = (int)center.X, baseY = (int)center.Y;
+                int baseX = (int)center.X - 70, baseY = (int)center.Y;
+                int refX = (int)center2.X - 70, refY = (int)center2.Y;
                 if (
                     new OrCriteria(
-                        new RectangleCriteria(baseX, baseY - 23, 139, 23),
-                        new IsoscelesTriangleCriteria(baseX, baseY, 139, 33)
-                    ).MeetCriteria(x, y)) newFlag = 1;
+                        new OrCriteria(
+                            new RectangleCriteria(baseX, baseY + 17, 139, 23),
+                            new IsoscelesTriangleCriteria(baseX, baseY, 139, 33)),
+                        new OrCriteria(
+                            new RectangleCriteria(refX, refY - 67, 139, 55),
+                            new IsoscelesTriangleCriteria(refX, refY - 12, 139, 33))
+                    ).MeetCriteria(x, y)) newFlag = 0b001;
                 if (
                     new OrCriteria(
-                        new RectangleCriteria(baseX, baseY - 23, 139, 23),
-                        new IsoscelesTriangleCriteria(baseX, baseY, 139, 33)
-                    ).MeetCriteria(x, y)) newFlag = 1;
+                        new OrCriteria(
+                            new RectangleCriteria(baseX, baseY - 9, 139, 23),
+                            new IsoscelesTriangleCriteria(baseX, baseY + 14, 139, 33)),
+                        new OrCriteria(
+                            new RectangleCriteria(refX, refY - 9, 139, 23),
+                            new IsoscelesTriangleCriteria(refX, refY + 14, 139, 33))
+                    ).MeetCriteria(x, y)) newFlag = 0b010;
+                if (
+                    new OrCriteria(
+                        new OrCriteria(
+                            new RectangleCriteria(baseX, baseY - 67, 139, 55),
+                            new IsoscelesTriangleCriteria(baseX, baseY - 12, 139, 33)),
+                        new OrCriteria(
+                            new RectangleCriteria(refX, refY + 17, 139, 23),
+                            new IsoscelesTriangleCriteria(refX, refY, 139, 33))
+                    ).MeetCriteria(x, y)) newFlag = 0b100;
+                if (flag != newFlag)
+                {
+                    flag = newFlag;
+                    switch (flag)
+                    {
+                        case 0b001: view.UpdateTop(cube, center, center2, flag); break;
+                        case 0b010: view.UpdateMid(cube, center, center2, flag); break;
+                        case 0b100: view.UpdateBot(cube, center, center2, flag); break;
+                    }
+                }
+            }
+            else
+            {
+                if (flag != 0b000)
+                {
+                    delta.X += x - lastMouse.X;
+                    delta.Y += y - lastMouse.Y;
+                    if (Math.Abs(delta.X) > 20) delta.X = 0;
+                    if (!preventRotation && Math.Abs(delta.Y) > 60)
+                    {
+                        if (y > position.Y)
+                        {
+                            if (startMouse.X > center.X + 25) RotateMajor();
+                            else RotateMinor();
+                        }
+                        else
+                        {
+                            if (startMouse.X > center2.X - 35) RotateMinor();
+                            else RotateMajor();
+                        }
+                        delta.X = 0;
+                        if (delta.Y < -60) delta.Y += 60;
+                        if (delta.Y > 60) delta.Y -= 60;
+                        Release();
+                        return;
+                    }
+                    if (delta.X > 20)
+                    {
+                        delta = Vector2.Zero;
+                        switch (flag)
+                        {
+                            case 0b001: ShiftTop(y > position.Y ? 1 : -1); break;
+                            case 0b100: ShiftBot(y > position.Y ? -1 : 1); break;
+                        }
+                        preventRotation = true;
+                    }
 
+                }
             }
         }
-        #region Control State
         internal bool RotateMajor()
         {
             if (!cube.Top.Rotatable()
@@ -86,7 +153,7 @@ namespace Square_1NN.Square1
             cube.Bot.Reverse(forMajor: true);
             (cube.Top.Major, cube.Bot.Major) = (cube.Bot.Major, cube.Top.Major);
             (cube.Top.MajorColor, cube.Bot.MajorColor) = (cube.Bot.MajorColor, cube.Top.MajorColor);
-            view.UpdateAll(cube, center, center2, 0);
+            view.Update(cube, center, center2, 0);
             return true;
         }
         internal bool RotateMinor()
@@ -100,7 +167,7 @@ namespace Square_1NN.Square1
             cube.Bot.Reverse(forMajor: false);
             (cube.Top.Minor, cube.Bot.Minor) = (cube.Bot.Minor, cube.Top.Minor);
             (cube.Top.MinorColor, cube.Bot.MinorColor) = (cube.Bot.MinorColor, cube.Top.MinorColor);
-            view.UpdateAll(cube, center, center2, 0);
+            view.Update(cube, center, center2, 0);
             return true;
         }
         internal void ShiftTop(int value)

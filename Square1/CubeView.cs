@@ -81,7 +81,7 @@ namespace Square_1NN.Square1
         LinkedList<(Texture2D, Color, Vector2)> topOrder = new LinkedList<(Texture2D, Color, Vector2)>();
         LinkedList<(Texture2D, Color, Vector2)> midOrder = new LinkedList<(Texture2D, Color, Vector2)>();
         LinkedList<(Texture2D, Color, Vector2)> botOrder = new LinkedList<(Texture2D, Color, Vector2)>();
-        internal void UpdateAll(Cube cube, Vector2 position, Vector2 position2, int flag)
+        internal void Update(Cube cube, Vector2 position, Vector2 position2, int flag)
         {
             UpdateTop(cube, position, position2, flag);
             UpdateMid(cube, position, position2, flag);
@@ -104,7 +104,7 @@ namespace Square_1NN.Square1
         }
         internal void UpdateTop(Cube cube, Vector2 position, Vector2 position2, int flag)
         {
-            Dictionary<char, Color> mapping = (flag & 1) == 1 ? highlightMapping : normalMapping;
+            Dictionary<char, Color> mapping = (flag & 0b001) == 0b001 ? highlightMapping : normalMapping;
             string info = cube.Top.Major + cube.Top.Minor;
             string sideColor = cube.Top.MajorSideColor + cube.Top.MinorSideColor;
             string roofColor = cube.Top.MajorColor + cube.Top.MinorColor;
@@ -122,7 +122,7 @@ namespace Square_1NN.Square1
         }
         internal void UpdateBot(Cube cube, Vector2 position, Vector2 position2, int flag)
         {
-            Dictionary<char, Color> mapping = (flag & 2) == 2 ? highlightMapping : normalMapping;
+            Dictionary<char, Color> mapping = (flag & 0b010) == 0b010 ? highlightMapping : normalMapping;
             string info = cube.Bot.Major + cube.Bot.Minor;
             string sideColor = cube.Bot.MajorSideColor + cube.Bot.MinorSideColor;
             BuildBot(position, info, sideColor, mapping);
@@ -140,7 +140,7 @@ namespace Square_1NN.Square1
         }
         internal void UpdateMid(Cube cube, Vector2 position, Vector2 position2, int flag)
         {
-            Dictionary<char, Color> mapping = (flag & 4) == 4 ? highlightMapping : normalMapping;
+            Dictionary<char, Color> mapping = (flag & 0b100) == 0b100 ? highlightMapping : normalMapping;
             string info = cube.Mid.Major + cube.Mid.Minor;
             string sideColor = cube.Mid.MajorSideColor + cube.Mid.MinorSideColor;
             BuildMid(position, info, sideColor, mapping);
