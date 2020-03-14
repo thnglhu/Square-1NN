@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Square_1NN.Extension
+﻿namespace Square_1NN.Support
 {
     class OrCriteria : Criteria
     {
@@ -14,7 +8,6 @@ namespace Square_1NN.Extension
             this.first = first;
             this.second = second;
         }
-
         public override bool MeetCriteria(int x, int y)
         {
             return first.MeetCriteria(x, y) || second.MeetCriteria(x, y);

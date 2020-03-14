@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Square_1NN.Extension;
+using Square_1NN.Support;
 using Square_1NN.Square1;
 using System.Collections.Generic;
 
@@ -61,7 +61,7 @@ namespace Square_1NN
                 Content.Load<Texture2D>("Pieces/scramble-button-1"), 
                 Content.Load<Texture2D>("Pieces/scramble-button-2"),
                 Content.Load<Texture2D>("Pieces/scramble-button-3"),
-                () => controller.Scramble(14));
+                () => controller.Scramble(14, true));
 
             ThreeStageButton reset_button = new ThreeStageButton(
                 Content.Load<Texture2D>("Pieces/reset-button-1"),

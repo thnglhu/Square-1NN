@@ -1,12 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Square_1NN.Extension;
+using Square_1NN.Support;
 using Square_1NN.Square1.Layer;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Square_1NN.Square1
 {

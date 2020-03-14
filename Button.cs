@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Square_1NN.Extension;
+using Square_1NN.Support;
 using System;
 using System.Collections.Generic;
 using System.Linq;
