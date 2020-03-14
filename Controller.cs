@@ -72,7 +72,7 @@ namespace Square_1NN
                 );
 
             scramble_button.Locate(new Vector2(25, 500 - 13));
-            reset_button.Locate(new Vector2(125, 500 - 13));
+            reset_button.Locate(new Vector2(175, 500 - 13));
 
             interactables.Add(scramble_button);
             interactables.Add(reset_button);
