@@ -154,7 +154,7 @@ namespace Square_1NN.Square1
             cube.Bot.Shift(4);
             cube.Bot.Reverse(forMajor: true);
             cube.Bot.Reverse(forMajor: false);
-            info = cube.Bot.Major + cube.Bot.Minor;
+            info = cube.Bot.Minor + cube.Bot.Major;
             sideColor = cube.Bot.MinorSideColor + cube.Bot.MajorSideColor;
             string roofColor = cube.Bot.MinorColor + cube.Bot.MajorColor;
             BuildTop(position2, info, sideColor, roofColor, mapping, refTopOrder);
