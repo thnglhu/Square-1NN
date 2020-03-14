@@ -82,78 +82,91 @@ namespace Square_1NN.Square1
         LinkedList<(Texture2D, Color, Vector2)> topOrder = new LinkedList<(Texture2D, Color, Vector2)>();
         LinkedList<(Texture2D, Color, Vector2)> midOrder = new LinkedList<(Texture2D, Color, Vector2)>();
         LinkedList<(Texture2D, Color, Vector2)> botOrder = new LinkedList<(Texture2D, Color, Vector2)>();
+        LinkedList<(Texture2D, Color, Vector2)> refTopOrder = new LinkedList<(Texture2D, Color, Vector2)>();
+        LinkedList<(Texture2D, Color, Vector2)> refMidOrder = new LinkedList<(Texture2D, Color, Vector2)>();
+        LinkedList<(Texture2D, Color, Vector2)> refBotOrder = new LinkedList<(Texture2D, Color, Vector2)>();
         internal void Update(Cube cube, Vector2 position, Vector2 position2, int flag)
         {
+            Clear();
             UpdateTop(cube, position, position2, flag);
             UpdateMid(cube, position, position2, flag);
             UpdateBot(cube, position, position2, flag);
         }
+        internal void Clear()
+        {
+            topOrder.Clear();
+            midOrder.Clear();
+            botOrder.Clear();
+            refTopOrder.Clear();
+            refMidOrder.Clear();
+            refBotOrder.Clear();
+        }
         internal void Display(IDisplayer displayer, Cube cube)
         {
             foreach ((Texture2D texture, Color color, Vector2 position) in botOrder)
-            {
                 displayer.DrawTexture(texture, color, position);
-            }
             foreach ((Texture2D texture, Color color, Vector2 position) in midOrder)
-            {
                 displayer.DrawTexture(texture, color, position);
-            }
             foreach ((Texture2D texture, Color color, Vector2 position) in topOrder)
-            {
                 displayer.DrawTexture(texture, color, position);
-            }
+            foreach ((Texture2D texture, Color color, Vector2 position) in refBotOrder)
+                displayer.DrawTexture(texture, color, position);
+            foreach ((Texture2D texture, Color color, Vector2 position) in refMidOrder)
+                displayer.DrawTexture(texture, color, position);
+            foreach ((Texture2D texture, Color color, Vector2 position) in refTopOrder)
+                displayer.DrawTexture(texture, color, position);
         }
         internal void UpdateTop(Cube cube, Vector2 position, Vector2 position2, int flag)
         {
-            Dictionary<char, Color> mapping = (flag & 0b001) == 0b001 ? highlightMapping : normalMapping;
+            Dictionary<char, Color> mapping = flag == 0b001 ? highlightMapping : normalMapping;
             string info = cube.Top.Major + cube.Top.Minor;
             string sideColor = cube.Top.MajorSideColor + cube.Top.MinorSideColor;
             string roofColor = cube.Top.MajorColor + cube.Top.MinorColor;
-            BuildTop(position, info, sideColor, roofColor, mapping);
+            BuildTop(position, info, sideColor, roofColor, mapping, topOrder);
 
             cube.Top.Shift(4);
             cube.Top.Reverse(forMajor: true);
             cube.Top.Reverse(forMajor: false);
-            info = cube.Top.Major + cube.Top.Minor;
-            sideColor = cube.Top.MajorColor + cube.Top.MinorColor;
-            BuildBot(position2, info, sideColor, mapping);
+            info = cube.Top.Minor + cube.Top.Major;
+            sideColor = cube.Top.MinorSideColor + cube.Top.MajorSideColor;
+            BuildBot(position2, info, sideColor, mapping, refBotOrder);
             cube.Top.Reverse(forMajor: false);
             cube.Top.Reverse(forMajor: true);
             cube.Top.Shift(-4);
         }
-        internal void UpdateBot(Cube cube, Vector2 position, Vector2 position2, int flag)
-        {
-            Dictionary<char, Color> mapping = (flag & 0b010) == 0b010 ? highlightMapping : normalMapping;
-            string info = cube.Bot.Major + cube.Bot.Minor;
-            string sideColor = cube.Bot.MajorSideColor + cube.Bot.MinorSideColor;
-            BuildBot(position, info, sideColor, mapping);
-
-            cube.Bot.Shift(4);
-            cube.Bot.Reverse(forMajor: true);
-            cube.Bot.Reverse(forMajor: false);
-            info = cube.Bot.Major + cube.Bot.Minor;
-            sideColor = cube.Bot.MajorColor + cube.Bot.MinorColor;
-            string roofColor = cube.Bot.MajorColor + cube.Bot.MinorColor;
-            BuildTop(position2, info, sideColor, roofColor, mapping);
-            cube.Bot.Reverse(forMajor: false);
-            cube.Bot.Reverse(forMajor: true);
-            cube.Bot.Shift(-4);
-        }
         internal void UpdateMid(Cube cube, Vector2 position, Vector2 position2, int flag)
         {
-            Dictionary<char, Color> mapping = (flag & 0b100) == 0b100 ? highlightMapping : normalMapping;
+            Dictionary<char, Color> mapping = flag == 0b010 ? highlightMapping : normalMapping;
             string info = cube.Mid.Major + cube.Mid.Minor;
             string sideColor = cube.Mid.MajorSideColor + cube.Mid.MinorSideColor;
-            BuildMid(position, info, sideColor, mapping);
+            BuildMid(position, info, sideColor, mapping, midOrder);
 
             info = cube.Mid.Minor + cube.Mid.Major;
             sideColor = cube.Mid.MinorSideColor + cube.Mid.MajorSideColor;
             LayerBase.Reverse(ref info);
             LayerBase.Reverse(ref sideColor);
-            BuildMid2(position2, info, sideColor, mapping);
+            BuildMid2(position2, info, sideColor, mapping, refMidOrder);
+        }
+        internal void UpdateBot(Cube cube, Vector2 position, Vector2 position2, int flag)
+        {
+            Dictionary<char, Color> mapping = flag == 0b100 ? highlightMapping : normalMapping;
+            string info = cube.Bot.Major + cube.Bot.Minor;
+            string sideColor = cube.Bot.MajorSideColor + cube.Bot.MinorSideColor;
+            BuildBot(position, info, sideColor, mapping, botOrder);
+
+            cube.Bot.Shift(4);
+            cube.Bot.Reverse(forMajor: true);
+            cube.Bot.Reverse(forMajor: false);
+            info = cube.Bot.Major + cube.Bot.Minor;
+            sideColor = cube.Bot.MinorSideColor + cube.Bot.MajorSideColor;
+            string roofColor = cube.Bot.MinorColor + cube.Bot.MajorColor;
+            BuildTop(position2, info, sideColor, roofColor, mapping, refTopOrder);
+            cube.Bot.Reverse(forMajor: false);
+            cube.Bot.Reverse(forMajor: true);
+            cube.Bot.Shift(-4);
         }
 
-        private void BuildBot(Vector2 position, string info, string sideColor, Dictionary<char, Color> color)
+        private static void BuildBot(Vector2 position, string info, string sideColor, Dictionary<char, Color> color, LinkedList<(Texture2D, Color, Vector2)> list)
         {
             info = info.Substring(6) + info.Substring(0, 6);
             sideColor = sideColor.Substring(6) + sideColor.Substring(0, 6);
@@ -163,29 +176,29 @@ namespace Square_1NN.Square1
                 int pos = (6 + subindex) % 12;
                 if (code == 2)
                 {
-                    botOrder.AddLast((smallBottomSide[pos], color[sideColor[subindex % sideColor.Length]], position));
+                    list.AddLast((smallBottomSide[pos], color[sideColor[subindex % sideColor.Length]], position));
                 }
                 else if (code == 1)
                 {
-                    botOrder.AddLast((largeBottomSide[2 * pos], color[sideColor[subindex % sideColor.Length]], position));
+                    list.AddLast((largeBottomSide[2 * pos], color[sideColor[subindex % sideColor.Length]], position));
                 }
                 else
                 {
-                    botOrder.AddLast((largeBottomSide[(2 * pos + 23) % 24], color[sideColor[subindex % sideColor.Length]], position));
+                    list.AddLast((largeBottomSide[(2 * pos + 23) % 24], color[sideColor[subindex % sideColor.Length]], position));
                 }
                 code = info[9 - subindex] - '0';
                 pos = (15 - subindex) % 12;
                 if (code == 2)
                 {
-                    botOrder.AddLast((smallBottomSide[pos], color[sideColor[(9 + sideColor.Length - subindex) % sideColor.Length]], position));
+                    list.AddLast((smallBottomSide[pos], color[sideColor[(9 + sideColor.Length - subindex) % sideColor.Length]], position));
                 }
                 else if (code == 1)
                 {
-                    botOrder.AddLast((largeBottomSide[2 * pos], color[sideColor[(9 + sideColor.Length - subindex) % sideColor.Length]], position));
+                    list.AddLast((largeBottomSide[2 * pos], color[sideColor[(9 + sideColor.Length - subindex) % sideColor.Length]], position));
                 }
                 else
                 {
-                    botOrder.AddLast((largeBottomSide[(2 * pos + 23) % 24], color[sideColor[(9 + sideColor.Length - subindex) % sideColor.Length]], position));
+                    list.AddLast((largeBottomSide[(2 * pos + 23) % 24], color[sideColor[(9 + sideColor.Length - subindex) % sideColor.Length]], position));
                 }
             }
             int index = 6;
@@ -194,66 +207,67 @@ namespace Square_1NN.Square1
                 int code = chr - '0';
                 if (code == 2)
                 {
-                    botOrder.AddLast((smallBottom[index], color['w'], position));
+                    list.AddLast((smallBottom[index], color['w'], position));
                 }
                 else if (code == 1)
                 {
-                    botOrder.AddLast((largeBottom[index], color['w'], position));
+                    list.AddLast((largeBottom[index], color['w'], position));
                 }
                 index = (index + 1) % 12;
             }
         }
-        private void BuildMid(Vector2 position, string info, string sideColor, Dictionary<char, Color> color)
+        private static void BuildMid(Vector2 position, string info, string sideColor, Dictionary<char, Color> color, LinkedList<(Texture2D, Color, Vector2)> list)
         {
             if (info[0] == '4')
             {
-                midOrder.AddLast((middleSide[0], color[sideColor[0]], position));
-                midOrder.AddLast((middleTop[0], color['w'], position));
+                list.AddLast((middleSide[0], color[sideColor[0]], position));
+                list.AddLast((middleTop[0], color['w'], position));
             }
             else
             {
-                midOrder.AddLast((middleSide[1], color[sideColor[0]], position));
-                midOrder.AddLast((middleTop[1], color['w'], position));
+                list.AddLast((middleSide[1], color[sideColor[0]], position));
+                list.AddLast((middleTop[1], color['w'], position));
             }
             if (info[6] == '2')
             {
-                midOrder.AddLast((middleSide[2], color[sideColor[9]], position));
-                midOrder.AddLast((middleSide[3], color[sideColor[11]], position));
-                midOrder.AddLast((middleTop[2], color['w'], position));
+                list.AddLast((middleSide[2], color[sideColor[9]], position));
+                list.AddLast((middleSide[3], color[sideColor[11]], position));
+                list.AddLast((middleTop[2], color['w'], position));
             }
             else
             {
-                midOrder.AddLast((middleSide[4], color[sideColor[9]], position));
-                midOrder.AddLast((middleSide[5], color[sideColor[11]], position));
-                midOrder.AddLast((middleTop[3], color['w'], position));
+                list.AddLast((middleSide[4], color[sideColor[9]], position));
+                list.AddLast((middleSide[5], color[sideColor[11]], position));
+                list.AddLast((middleTop[3], color['w'], position));
             }
         }
-        private void BuildMid2(Vector2 position, string info, string sideColor, Dictionary<char, Color> color)
+        private static void BuildMid2(Vector2 position, string info, string sideColor, Dictionary<char, Color> color, LinkedList<(Texture2D, Color, Vector2)> list)
         {
+
             if (info[0] == '4')
             {
-                midOrder.AddLast((middleSide[8], color[sideColor[0]], position));
-                midOrder.AddLast((middleSide[9], color[sideColor[1]], position));
-                midOrder.AddLast((middleTop[6], color['w'], position));
+                list.AddLast((middleSide[8], color[sideColor[0]], position));
+                list.AddLast((middleSide[9], color[sideColor[1]], position));
+                list.AddLast((middleTop[6], color['w'], position));
             }
             else
             {
-                midOrder.AddLast((middleSide[10], color[sideColor[0]], position));
-                midOrder.AddLast((middleSide[11], color[sideColor[2]], position));
-                midOrder.AddLast((middleTop[7], color['w'], position));
+                list.AddLast((middleSide[10], color[sideColor[0]], position));
+                list.AddLast((middleSide[11], color[sideColor[2]], position));
+                list.AddLast((middleTop[7], color['w'], position));
             }
             if (info[6] == '2')
             {
-                midOrder.AddLast((middleSide[6], color[sideColor[11]], position));
-                midOrder.AddLast((middleTop[4], color['w'], position));
+                list.AddLast((middleSide[6], color[sideColor[11]], position));
+                list.AddLast((middleTop[4], color['w'], position));
             }
             else
             {
-                midOrder.AddLast((middleSide[7], color[sideColor[11]], position));
-                midOrder.AddLast((middleTop[5], color['w'], position));
+                list.AddLast((middleSide[7], color[sideColor[11]], position));
+                list.AddLast((middleTop[5], color['w'], position));
             }
         }
-        private void BuildTop(Vector2 position, string info, string sideColor, string roofColor, Dictionary<char, Color> color)
+        private static void BuildTop(Vector2 position, string info, string sideColor, string roofColor, Dictionary<char, Color> color, LinkedList<(Texture2D, Color, Vector2)> list)
         {
             string backup = info;
             info = info.Substring(6) + info.Substring(0, 6);
@@ -263,28 +277,28 @@ namespace Square_1NN.Square1
                 int code = info[subindex] - '0';
                 int pos = (6 + subindex) % 12;
                 if (code == 2)
-                    topOrder.AddLast((smallTopSide[pos], color[sideColor[subindex % sideColor.Length]], position));
+                    list.AddLast((smallTopSide[pos], color[sideColor[subindex % sideColor.Length]], position));
                 else if (code == 1)
-                    topOrder.AddLast((largeTopSide[2 * pos], color[sideColor[subindex % sideColor.Length]], position));
+                    list.AddLast((largeTopSide[2 * pos], color[sideColor[subindex % sideColor.Length]], position));
                 else
-                    topOrder.AddLast((largeTopSide[(2 * pos + 23) % 24], color[sideColor[subindex % sideColor.Length]], position));
+                    list.AddLast((largeTopSide[(2 * pos + 23) % 24], color[sideColor[subindex % sideColor.Length]], position));
                 code = info[9 - subindex] - '0';
                 pos = (15 - subindex) % 12;
                 if (code == 2)
-                    topOrder.AddLast((smallTopSide[pos], color[sideColor[(9 + sideColor.Length - subindex) % sideColor.Length]], position));
+                    list.AddLast((smallTopSide[pos], color[sideColor[(9 + sideColor.Length - subindex) % sideColor.Length]], position));
                 else if (code == 1)
-                    topOrder.AddLast((largeTopSide[2 * pos], color[sideColor[(9 + sideColor.Length - subindex) % sideColor.Length]], position));
+                    list.AddLast((largeTopSide[2 * pos], color[sideColor[(9 + sideColor.Length - subindex) % sideColor.Length]], position));
                 else
-                    topOrder.AddLast((largeTopSide[(2 * pos + 23) % 24], color[sideColor[(9 + sideColor.Length - subindex) % sideColor.Length]], position));
+                    list.AddLast((largeTopSide[(2 * pos + 23) % 24], color[sideColor[(9 + sideColor.Length - subindex) % sideColor.Length]], position));
             }
             int index = 0;
             foreach (char chr in backup)
             {
                 int code = chr - '0';
                 if (code == 2)
-                    topOrder.AddLast((smallTop[index], color[roofColor[index]], position));
+                    list.AddLast((smallTop[index], color[roofColor[index]], position));
                 else if (code == 1)
-                    topOrder.AddLast((largeTop[index], color[roofColor[index]], position));
+                    list.AddLast((largeTop[index], color[roofColor[index]], position));
                 index = (index + 1) % 12;
             }
         }

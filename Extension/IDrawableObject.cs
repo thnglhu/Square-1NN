@@ -10,6 +10,5 @@ namespace Square_1NN.Extension
     interface IDrawableObject
     {
         void Display(IDisplayer displayer);
-        void Locate(Vector2 position);
     }
 }

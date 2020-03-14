@@ -43,11 +43,11 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="OrCriteria.cs" />
     <Compile Include="Button.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="CubeLite.cs" />
-    <Compile Include="Extension\ICriteria.cs" />
+    <Compile Include="Extension\BooleanCriteria.cs" />
+    <Compile Include="Extension\Criteria.cs" />
     <Compile Include="Extension\OrCriteria.cs" />
     <Compile Include="Extension\RectangleCriteria.cs" />
     <Compile Include="Extension\IsoscelesTriangleCriteria.cs" />
@@ -56,15 +56,14 @@
     <Compile Include="Extension\IInteractable.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RectangleCriteria.cs" />
-    <Compile Include="Square1\ColoredMiddleLayer.cs" />
-    <Compile Include="Square1\ColoredRearLayer.cs" />
+    <Compile Include="Square1\Layer\ColoredMiddleLayer.cs" />
+    <Compile Include="Square1\Layer\ColoredRearLayer.cs" />
     <Compile Include="Square1\Cube.cs" />
     <Compile Include="Square1\CubeController.cs" />
     <Compile Include="Square1\CubeView.cs" />
-    <Compile Include="Square1\LayerBase.cs" />
-    <Compile Include="Square1\MiddleLayer.cs" />
-    <Compile Include="Square1\RearLayer.cs" />
+    <Compile Include="Square1\Layer\LayerBase.cs" />
+    <Compile Include="Square1\Layer\MiddleLayer.cs" />
+    <Compile Include="Square1\Layer\RearLayer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">

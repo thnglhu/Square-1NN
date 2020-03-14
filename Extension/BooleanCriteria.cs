@@ -6,18 +6,17 @@ using System.Threading.Tasks;
 
 namespace Square_1NN.Extension
 {
-    class OrCriteria : Criteria
+    class BooleanCriteria : Criteria
     {
-        Criteria first, second;
-        public OrCriteria(Criteria first, Criteria second)
+        bool value;
+        public BooleanCriteria(bool value)
         {
-            this.first = first;
-            this.second = second;
+            this.value = value;
         }
 
         public override bool MeetCriteria(int x, int y)
         {
-            return first.MeetCriteria(x, y) || second.MeetCriteria(x, y);
+            return value;
         }
     }
 }

@@ -20,6 +20,7 @@ namespace Square_1NN.Square1
             this.cube = cube;
             this.view = view;
             CubeView.Init(displayer.Manager());
+            view.Update(cube, center, center2, flag);
         }
         public void Display(IDisplayer displayer)
         {
@@ -31,6 +32,7 @@ namespace Square_1NN.Square1
             this.position = position;
             center = position - flippedDelta / 2;
             center2 = position + flippedDelta / 2;
+            view.Update(cube, center, center2, flag);
         }
         private bool lockLayer = false;
         private bool preventRotation = false;
@@ -104,46 +106,34 @@ namespace Square_1NN.Square1
                 int newFlag = 0;
                 int baseX = (int)center.X - 70, baseY = (int)center.Y;
                 int refX = (int)center2.X - 70, refY = (int)center2.Y;
-                if (
-                    new OrCriteria(
-                        new OrCriteria(
-                            new RectangleCriteria(baseX, baseY + 17, 139, 23),
-                            new IsoscelesTriangleCriteria(baseX, baseY, 139, 33)),
-                        new OrCriteria(
-                            new RectangleCriteria(refX, refY - 67, 139, 55),
-                            new IsoscelesTriangleCriteria(refX, refY - 12, 139, 33))
-                    ).MeetCriteria(x, y)) newFlag = 0b001;
-                if (
-                    new OrCriteria(
-                        new OrCriteria(
-                            new RectangleCriteria(baseX, baseY - 9, 139, 23),
-                            new IsoscelesTriangleCriteria(baseX, baseY + 14, 139, 33)),
-                        new OrCriteria(
-                            new RectangleCriteria(refX, refY - 9, 139, 23),
-                            new IsoscelesTriangleCriteria(refX, refY + 14, 139, 33))
+                if ((
+                    new IsoscelesTriangleCriteria(baseX, baseY + 38, 140, 35)
+                    | new RectangleCriteria(baseX, baseY + 13, 140, 25)
+                    ).MeetCriteria(x, y)) newFlag = 0b100;
+                if ((new IsoscelesTriangleCriteria(baseX, baseY + 12, 140, 35)
+                    | new RectangleCriteria(baseX, baseY - 13, 140, 25)
                     ).MeetCriteria(x, y)) newFlag = 0b010;
-                if (
-                    new OrCriteria(
-                        new OrCriteria(
-                            new RectangleCriteria(baseX, baseY - 67, 139, 55),
-                            new IsoscelesTriangleCriteria(baseX, baseY - 12, 139, 33)),
-                        new OrCriteria(
-                            new RectangleCriteria(refX, refY + 17, 139, 23),
-                            new IsoscelesTriangleCriteria(refX, refY, 139, 33))
+                if ((new IsoscelesTriangleCriteria(baseX, baseY - 14, 140, 35)
+                    | new RectangleCriteria(baseX, baseY - 75, 140, 60)
+                    ).MeetCriteria(x, y)) newFlag = 0b001;
+                if ((new IsoscelesTriangleCriteria(refX, refY + 38, 140, 35)
+                    | new RectangleCriteria(refX, refY + 13, 140, 25)
+                    ).MeetCriteria(x, y)) newFlag = 0b001;
+                if ((new IsoscelesTriangleCriteria(refX, refY + 12, 140, 35)
+                    | new RectangleCriteria(refX, refY - 13, 140, 25)
+                    ).MeetCriteria(x, y)) newFlag = 0b010;
+                if ((new IsoscelesTriangleCriteria(refX, refY - 14, 140, 35)
+                    | new RectangleCriteria(refX, refY - 75, 140, 60)
                     ).MeetCriteria(x, y)) newFlag = 0b100;
                 if (flag != newFlag)
                 {
                     flag = newFlag;
-                    switch (flag)
-                    {
-                        case 0b001: view.UpdateTop(cube, center, center2, flag); break;
-                        case 0b010: view.UpdateMid(cube, center, center2, flag); break;
-                        case 0b100: view.UpdateBot(cube, center, center2, flag); break;
-                    }
+                    view.Update(cube, center, center2, flag);
                 }
             }
             else
             {
+                return;
                 if (flag != 0b000)
                 {
                     delta.X += x - lastMouse.X;

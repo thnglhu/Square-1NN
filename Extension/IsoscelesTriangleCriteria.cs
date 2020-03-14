@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Square_1NN.Extension
 {
-    class IsoscelesTriangleCriteria : ICriteria
+    class IsoscelesTriangleCriteria : Criteria
     {
         int originX, originY, sizeX, sizeY;
         public IsoscelesTriangleCriteria(int originX, int originY, int sizeX, int sizeY)
@@ -16,7 +16,7 @@ namespace Square_1NN.Extension
             this.sizeX = sizeX;
             this.sizeY = sizeY;
         }
-        public bool MeetCriteria(int x, int y)
+        public override bool MeetCriteria(int x, int y)
         {
             if (x >= originX && y >= originY && x <= originX + sizeX && y <= originY + sizeY)
             {

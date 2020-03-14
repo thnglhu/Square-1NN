@@ -51,7 +51,10 @@ namespace Square_1NN
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             interactables = new HashSet<IInteractable>();
-            controller = new CubeController(new Cube(), new CubeView(), this);
+            controller = new CubeController(
+                new Cube("YrgygYgoyo YobybYbryr Rgo Obr wrWrgwgWgo woWobwbWbr"), 
+                new CubeView(), 
+                this);
             controller.Locate(new Vector2(100, 200));
 
             ThreeStageButton scramble_button = new ThreeStageButton(
@@ -72,7 +75,7 @@ namespace Square_1NN
 
             interactables.Add(scramble_button);
             interactables.Add(reset_button);
-            // interactables.Add(cube);
+            interactables.Add(controller);
 
             font = Content.Load<SpriteFont>("MarioFont");
             
