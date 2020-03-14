@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Square_1NN.Extension;
+using Square_1NN.Square1.Layer;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

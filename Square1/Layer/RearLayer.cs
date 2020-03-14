@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Square_1NN.Square1
+namespace Square_1NN.Square1.Layer
 {
     class RearLayer : LayerBase
     {

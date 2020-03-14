@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Square_1NN.Square1
+namespace Square_1NN.Square1.Layer
 {
     class ColoredMiddleLayer : MiddleLayer
     {
