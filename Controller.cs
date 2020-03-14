@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Square_1NN.Extension;
 using Square_1NN.Square1;
 using System.Collections.Generic;
 

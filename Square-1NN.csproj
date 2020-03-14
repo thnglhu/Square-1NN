@@ -46,9 +46,13 @@
     <Compile Include="Button.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="CubeLite.cs" />
-    <Compile Include="IDisplayer.cs" />
-    <Compile Include="IDrawableObject.cs" />
-    <Compile Include="IInteractable.cs" />
+    <Compile Include="Extension\ICriteria.cs" />
+    <Compile Include="Extension\OrCriteria.cs" />
+    <Compile Include="Extension\RectangleCriteria.cs" />
+    <Compile Include="Extension\IsoscelesTriangleCriteria.cs" />
+    <Compile Include="Extension\IDisplayer.cs" />
+    <Compile Include="Extension\IDrawableObject.cs" />
+    <Compile Include="Extension\IInteractable.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Square1\ColoredMiddleLayer.cs" />

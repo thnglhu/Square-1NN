@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using Square_1NN.Extension;
 
 namespace Square_1NN.Square1
 {
