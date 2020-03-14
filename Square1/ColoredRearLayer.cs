@@ -135,32 +135,6 @@ namespace Square_1NN.Square1
             MinorSideColor = ShiftString(backup.Item4, backup.Item2, count);
             MajorColor = ShiftString(backup.Item1, backup.Item3, count);
             MinorColor = ShiftString(backup.Item3, backup.Item1, count);
-            //if (forward)
-            //{
-            //    if (Major[0] != '3')
-            //    {
-            //        MinorColor = MinorColor + MajorColor[0];
-            //        MajorColor = MajorColor.Substring(1);
-            //    }
-            //    if (Minor[0] != '3')
-            //    {
-            //        MajorColor = MajorColor + MinorColor[0];
-            //        MinorColor = MinorColor.Substring(1);
-            //    }
-            //}
-            //else
-            //{
-            //    if (Minor[Minor.Length - 1] != '3')
-            //    {
-            //        MajorColor = MinorColor[MinorColor.Length - 1] + MajorColor;
-            //        MinorColor = MinorColor.Substring(0, MinorColor.Length - 1);
-            //    }
-            //    if (Major[Major.Length - 1] != '3')
-            //    {
-            //        MinorColor = MajorColor[MajorColor.Length - 1] + MinorColor;
-            //        MajorColor = MajorColor.Substring(0, MajorColor.Length - 1);
-            //    }
-            //}
             base.Shift(forward);
         }
         public override void Reverse(bool forMajor)

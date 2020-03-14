@@ -15,7 +15,7 @@ namespace Square_1NN
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        Cube cube;
+        CubeController controller;
         SpriteFont font;
         HashSet<IInteractable> interactables;
         public Controller()
@@ -51,33 +51,28 @@ namespace Square_1NN
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             interactables = new HashSet<IInteractable>();
-            cube = new Cube(this);
-            cube.Locate(new Vector2(100, 200));
+            controller = new CubeController(new Cube(), new CubeView(), this);
+            controller.Locate(new Vector2(100, 200));
 
             ThreeStageButton scramble_button = new ThreeStageButton(
                 Content.Load<Texture2D>("Pieces/scramble-button-1"), 
                 Content.Load<Texture2D>("Pieces/scramble-button-2"),
                 Content.Load<Texture2D>("Pieces/scramble-button-3"),
-                () => {
-                    LinkedList<(int, int)> list = cube.Scramble(14, false);
-                    LinkedListNode<(int, int)> last = list.Last;
-                    list.AddLast((0, 0));
-                    cube.Animate(list);
-                });
+                () => controller.Scramble(14));
 
             ThreeStageButton reset_button = new ThreeStageButton(
                 Content.Load<Texture2D>("Pieces/reset-button-1"),
                 Content.Load<Texture2D>("Pieces/reset-button-2"),
                 Content.Load<Texture2D>("Pieces/reset-button-3"),
-                () => cube.Reset()
-                );
+                () => controller.Reset()
+                ); ;
 
             scramble_button.Locate(new Vector2(25, 500 - 13));
             reset_button.Locate(new Vector2(175, 500 - 13));
 
             interactables.Add(scramble_button);
             interactables.Add(reset_button);
-            interactables.Add(cube);
+            // interactables.Add(cube);
 
             font = Content.Load<SpriteFont>("MarioFont");
             

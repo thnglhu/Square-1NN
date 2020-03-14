@@ -183,7 +183,7 @@ namespace Square_1NN.Square1
         }
         internal void Scramble(int number, bool forAnimation = false)
         {
-            Cube backup = cube.Clone();
+            Cube backup = cube.Clone() as Cube;
             Random random = new Random();
             Queue<(int, int)> queue = new Queue<(int, int)>();
             for (int index = 0; index < number; index++)
@@ -192,6 +192,10 @@ namespace Square_1NN.Square1
                 (int, int) randomPick = available[random.Next(available.Count)];
                 queue.Enqueue(randomPick);
             }
+        }
+        internal void Reset()
+        {
+
         }
         #endregion
     }
