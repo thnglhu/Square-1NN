@@ -22,7 +22,7 @@ namespace Square_1NN.Square1
         private static Texture2D[] middleTop;
         private static Dictionary<char, Color> normalMapping = new Dictionary<char, Color>()
         {
-            ['w'] = Color.AntiqueWhite,
+            ['w'] = Color.White,
             ['y'] = Color.Yellow,
             ['r'] = Color.Red,
             ['g'] = Color.LawnGreen,
@@ -31,7 +31,7 @@ namespace Square_1NN.Square1
         };
         private static Dictionary<char, Color> highlightMapping = new Dictionary<char, Color>()
         {
-            ['w'] = Color.White,
+            ['w'] = Color.AntiqueWhite,
             ['y'] = new Color(255, 250, 149),
             ['r'] = new Color(255, 89, 89),
             ['g'] = new Color(185, 255, 106),
@@ -51,28 +51,39 @@ namespace Square_1NN.Square1
                 largeTopSide = new Texture2D[24];
                 smallBottomSide = new Texture2D[12];
                 largeBottomSide = new Texture2D[24];
+                Texture2D TryLoad(string path)
+                {
+                    try
+                    {
+                        return manager.Load<Texture2D>(path);
+                    }
+                    catch (ContentLoadException)
+                    {
+                        return null;
+                    }
+                }
                 for (int index = 1; index <= 12; index++)
                 {
-                    smallTop[index - 1] = manager.Load<Texture2D>($"Pieces/smallTop{index}");
-                    smallBottom[index - 1] = manager.Load<Texture2D>($"Pieces/smallBottom{index}");
-                    largeTop[index - 1] = manager.Load<Texture2D>($"Pieces/largeTop{index}");
-                    largeBottom[index - 1] = manager.Load<Texture2D>($"Pieces/largeBottom{index}");
-                    smallTopSide[index - 1] = manager.Load<Texture2D>($"Pieces/smallTopSide{index}");
-                    largeTopSide[2 * (index - 1)] = manager.Load<Texture2D>($"Pieces/largeTopSide{2 * index - 1}");
-                    largeTopSide[2 * (index - 1) + 1] = manager.Load<Texture2D>($"Pieces/largeTopSide{2 * index}");
-                    smallBottomSide[index - 1] = manager.Load<Texture2D>($"Pieces/smallBottomSide{index}");
-                    largeBottomSide[2 * (index - 1)] = manager.Load<Texture2D>($"Pieces/largeBottomSide{2 * index - 1}");
-                    largeBottomSide[2 * (index - 1) + 1] = manager.Load<Texture2D>($"Pieces/largeBottomSide{2 * index}");
+                    smallTop[index - 1] = TryLoad($"Pieces/smallTop{index}");
+                    smallBottom[index - 1] = TryLoad($"Pieces/smallBottom{index}");
+                    largeTop[index - 1] = TryLoad($"Pieces/largeTop{index}");
+                    largeBottom[index - 1] = TryLoad($"Pieces/largeBottom{index}");
+                    smallTopSide[index - 1] = TryLoad($"Pieces/smallTopSide{index}");
+                    largeTopSide[2 * (index - 1)] = TryLoad($"Pieces/largeTopSide{2 * index - 1}");
+                    largeTopSide[2 * (index - 1) + 1] = TryLoad($"Pieces/largeTopSide{2 * index}");
+                    smallBottomSide[index - 1] = TryLoad($"Pieces/smallBottomSide{index}");
+                    largeBottomSide[2 * (index - 1)] = TryLoad($"Pieces/largeBottomSide{2 * index - 1}");
+                    largeBottomSide[2 * (index - 1) + 1] = TryLoad($"Pieces/largeBottomSide{2 * index}");
                 }
                 middleSide = new Texture2D[12];
                 for (int index = 1; index <= 12; index++)
                 {
-                    middleSide[index - 1] = manager.Load<Texture2D>($"Pieces/middleSide{index}");
+                    middleSide[index - 1] = TryLoad($"Pieces/middleSide{index}");
                 }
                 middleTop = new Texture2D[8];
                 for (int index = 1; index <= 8; index++)
                 {
-                    middleTop[index - 1] = manager.Load<Texture2D>($"Pieces/middleTop{index}");
+                    middleTop[index - 1] = TryLoad($"Pieces/middleTop{index}");
                 }
             }
         }
@@ -98,20 +109,23 @@ namespace Square_1NN.Square1
             refMidOrder.Clear();
             refBotOrder.Clear();
         }
+        public int Count { get; set; } = 1;
         internal void Display(IDisplayer displayer, Cube cube)
         {
-            foreach ((Texture2D texture, Color color, Vector2 position) in botOrder)
+            List<(Texture2D texture, Color color, Vector2 position)> list = new List<(Texture2D texture, Color color, Vector2 position)>();
+            list.AddRange(botOrder);
+            list.AddRange(midOrder);
+            list.AddRange(topOrder);
+            list.AddRange(refBotOrder);
+            list.AddRange(refMidOrder);
+            list.AddRange(refTopOrder);
+            int count = 0;
+            foreach ((Texture2D texture, Color color, Vector2 position) in list)
+            {
+                if (texture == null) continue;
+                if (count++ >= Count) break;
                 displayer.DrawTexture(texture, color, position);
-            foreach ((Texture2D texture, Color color, Vector2 position) in midOrder)
-                displayer.DrawTexture(texture, color, position);
-            foreach ((Texture2D texture, Color color, Vector2 position) in topOrder)
-                displayer.DrawTexture(texture, color, position);
-            foreach ((Texture2D texture, Color color, Vector2 position) in refBotOrder)
-                displayer.DrawTexture(texture, color, position);
-            foreach ((Texture2D texture, Color color, Vector2 position) in refMidOrder)
-                displayer.DrawTexture(texture, color, position);
-            foreach ((Texture2D texture, Color color, Vector2 position) in refTopOrder)
-                displayer.DrawTexture(texture, color, position);
+            }
         }
         internal void UpdateTop(Cube cube, Vector2 position, Vector2 position2, int flag)
         {

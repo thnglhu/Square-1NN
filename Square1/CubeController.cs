@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Square_1NN.Support;
 
 namespace Square_1NN.Square1
@@ -11,12 +12,15 @@ namespace Square_1NN.Square1
         CubeView view;
         Vector2 position;
         private Vector2 center = Vector2.Zero, center2 = Vector2.Zero;
+        SoundEffect moveSfx, rotateSfx;
         private static readonly Vector2 flippedDelta = new Vector2(0, 200);
         internal CubeController(Cube cube, CubeView view, IDisplayer displayer)
         {
             this.cube = cube;
             this.view = view;
-            CubeView.Init(displayer.Manager());
+            moveSfx = displayer.GetManager().Load<SoundEffect>("Sound/Move");
+            rotateSfx = displayer.GetManager().Load<SoundEffect>("Sound/Rotate");
+            CubeView.Init(displayer.GetManager());
             UpdateView();
         }
         public void Display(IDisplayer displayer)
@@ -53,12 +57,13 @@ namespace Square_1NN.Square1
             if (pressed)
             {
                 pressed = false;
+                lastTime = null;
             }
         }
 
         #region Control State
         
-        internal bool RotateMajor()
+        internal bool RotateMajor(bool sfxEnabled = false)
         {
             if (cube.Top.Rotatable() && cube.Mid.Rotatable() && cube.Bot.Rotatable())
             {
@@ -68,12 +73,13 @@ namespace Square_1NN.Square1
                 (cube.Top.Major, cube.Bot.Major) = (cube.Bot.Major, cube.Top.Major);
                 (cube.Top.MajorColor, cube.Bot.MajorColor) = (cube.Bot.MajorColor, cube.Top.MajorColor);
                 (cube.Top.MajorSideColor, cube.Bot.MajorSideColor) = (cube.Bot.MajorSideColor, cube.Top.MajorSideColor);
+                if (sfxEnabled) rotateSfx.Play();
                 return true;
             }
 
             return false;
         }
-        internal bool RotateMinor()
+        internal bool RotateMinor(bool sfxEnabled = false)
         {
             if (cube.Top.Rotatable() && cube.Mid.Rotatable() && cube.Bot.Rotatable())
             {
@@ -83,16 +89,19 @@ namespace Square_1NN.Square1
                 (cube.Top.Minor, cube.Bot.Minor) = (cube.Bot.Minor, cube.Top.Minor);
                 (cube.Top.MinorColor, cube.Bot.MinorColor) = (cube.Bot.MinorColor, cube.Top.MinorColor);
                 (cube.Top.MinorSideColor, cube.Bot.MinorSideColor) = (cube.Bot.MinorSideColor, cube.Top.MinorSideColor);
+                if (sfxEnabled) rotateSfx.Play();
                 return true;
             }
             return false;
         }
-        internal void ShiftTop(int value)
+        internal void ShiftTop(int value, bool sfxEnabled = false)
         {
+            if (sfxEnabled) moveSfx.Play();
             cube.Top.Shift(value);
         }
-        internal void ShiftBot(int value)
+        internal void ShiftBot(int value, bool sfxEnabled = false)
         {
+            if (sfxEnabled) moveSfx.Play();
             cube.Bot.Shift(-value);
         }
         private void UpdateView()
@@ -101,47 +110,57 @@ namespace Square_1NN.Square1
         }
         LinkedList<(int, int)> sequence = new LinkedList<(int, int)>();
         double? lastTime = null;
-        double threshHold = 50;
+        double threshHold = 60;
+        double total = 0;
         public void Update(int x, int y, GameTime gameTime)
         {
+            total += gameTime.ElapsedGameTime.TotalMilliseconds;
+            if (total >= 50)
+            {
+                total -= 50;
+                view.Count++;
+            }
+            return;
             if (sequence.Count > 0)
             {
                 double currentTime = gameTime.TotalGameTime.TotalMilliseconds;
                 if (lastTime == null) lastTime = currentTime;
                 if (currentTime - lastTime > threshHold)
                 {
+                    if (threshHold > 10) threshHold--;
                     lastTime += threshHold;
                     (int, int) value = sequence.First.Value;
                     bool last = false;
                     if (value.Item1 < 0)
                     {
-                        ShiftTop(-1);
+                        ShiftTop(-1, true);
                         value.Item1 += 1;
                     }
                     else if (value.Item1 > 0)
                     {
-                        ShiftTop(1);
+                        ShiftTop(1, true);
                         value.Item1 -= 1;
                     }
                     else if (value.Item2 < 0)
                     {
-                        ShiftBot(-1);
+                        ShiftBot(-1, true);
                         value.Item2 += 1;
                     }
                     else if (value.Item2 > 0)
                     {
-                        ShiftBot(1);
+                        ShiftBot(1, true);
                         value.Item2 -= 1;
                     }
                     else last = true;
                     if (last)
                     {
-                        RotateMajor();
+                        RotateMajor(true);
                         sequence.RemoveFirst();
                     }
                     else sequence.First.Value = value;
                     UpdateView();
                 }
+                if (sequence.Count == 0) threshHold = 60;
             }
             else
             {
@@ -187,14 +206,14 @@ namespace Square_1NN.Square1
                             if (y < position.Y)
                             {
                                 Console.WriteLine(startMouse.X + " . " + (center.X + 25));
-                                if (startMouse.X > center.X + 25) RotateMajor();
-                                else RotateMinor();
+                                if (startMouse.X > center.X + 25) RotateMajor(true);
+                                else RotateMinor(true);
                             }
                             else
                             {
                                 Console.WriteLine(startMouse.X + " - " + (center2.X - 25));
-                                if (startMouse.X > center2.X - 35) RotateMajor();
-                                else RotateMinor();
+                                if (startMouse.X > center2.X - 35) RotateMajor(true);
+                                else RotateMinor(true);
                             }
                             delta.X = 0;
                             if (delta.Y < -60) delta.Y += 60;
@@ -209,8 +228,8 @@ namespace Square_1NN.Square1
                             delta = Vector2.Zero;
                             switch (flag)
                             {
-                                case 0b001: ShiftTop(y > position.Y ? dir : -dir); UpdateView(); break;
-                                case 0b100: ShiftBot(y > position.Y ? -dir : dir); UpdateView(); break;
+                                case 0b001: ShiftTop(y > position.Y ? dir : -dir, true); UpdateView(); break;
+                                case 0b100: ShiftBot(y > position.Y ? -dir : dir, true); UpdateView(); break;
                             }
                             preventRotation = true;
                         }
@@ -222,6 +241,7 @@ namespace Square_1NN.Square1
         }
         internal void Scramble(int number, bool forAnimation = false)
         {
+            forAnimation = false;
             Cube backup = cube.Clone() as Cube;
             Random random = new Random();
             LinkedList<(int, int)> queue = new LinkedList<(int, int)>();
@@ -241,9 +261,11 @@ namespace Square_1NN.Square1
                 cube = backup;
                 sequence = queue;
             }
+            view.Count = 0;
         }
         internal void Reset()
         {
+            view.Count = 0;
             cube = Cube.Solved();
             UpdateView();
         }

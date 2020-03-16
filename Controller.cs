@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Input;
 using Square_1NN.Support;
 using Square_1NN.Square1;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Media;
 
 namespace Square_1NN
 {
@@ -45,23 +46,23 @@ namespace Square_1NN
         /// LoadContent will be called once per game and is the place to load
         /// all of your content.
         /// </summary>
-        LinkedList<(int, int)> trace;
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
             interactables = new HashSet<IInteractable>();
             controller = new CubeController(
-                new Cube("YrgygYgoyo YobybYbryr Rgo Obr wrWrgwgWgo woWobwbWbr"), 
+                new Cube("yrYrgygYgo yoYobybYbr Rgo Obr wrWrgwgWgo woWobwbWbr"), 
                 new CubeView(), 
                 this);
             controller.Locate(new Vector2(100, 200));
+            // controller.Scramble(50);
 
             ThreeStageButton scramble_button = new ThreeStageButton(
                 Content.Load<Texture2D>("Pieces/scramble-button-1"), 
                 Content.Load<Texture2D>("Pieces/scramble-button-2"),
                 Content.Load<Texture2D>("Pieces/scramble-button-3"),
-                () => controller.Scramble(14, true));
+                () => controller.Scramble(30, true));
 
             ThreeStageButton reset_button = new ThreeStageButton(
                 Content.Load<Texture2D>("Pieces/reset-button-1"),
@@ -131,7 +132,8 @@ namespace Square_1NN
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            //GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.White);
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
@@ -154,7 +156,7 @@ namespace Square_1NN
             spriteBatch.DrawString(font, text, position - font.MeasureString(text) / 2, tint);
         }
 
-        public ContentManager Manager()
+        public ContentManager GetManager()
         {
             return Content;
         }
